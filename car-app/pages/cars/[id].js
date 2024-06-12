@@ -1,6 +1,53 @@
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
+// export async function getServerSideProps({ params }) {
+// 	try {
+// 		console.log(`Fetching data for car with id: ${params.id}`);
+// 		const res = await fetch(`http://localhost:3000/${params.id}.json`);
+// 		if (!res.ok) {
+// 			throw new Error(`Failed to fetch data for car with id ${params.id}`);
+// 		}
+// 		const data = await res.json();
+// 		console.log('Data fetched for car:', data);
+// 		return {
+// 			props: { car: data },
+// 		};
+// 	} catch (error) {
+// 		console.error('Failed to fetch car data:', error);
+// 		return {
+// 			props: { car: null }, // Return null car if fetch fails
+// 		};
+// 	}
+// }
+
+// next has no way of knowing how many pages we have associated to a dynamic route
+// to pre-render all of the routes for this dynamic URL we implement the getStaticPaths(), which will return a list of those routes
+export async function getStaticPaths() {
+	try {
+		console.log('Fetching car paths');
+		const res = await fetch('http://localhost:3000/cars.json');
+		if (!res.ok) {
+			throw new Error('Failed to fetch cars list');
+		}
+		const data = await res.json();
+		console.log('Car paths fetched:', data);
+
+		const paths = data.map((car) => ({ params: { id: car } }));
+
+		return {
+			paths,
+			fallback: false,
+		};
+	} catch (error) {
+		console.error('Failed to fetch paths:', error);
+		return {
+			paths: [],
+			fallback: false,
+		};
+	}
+}
+
 export async function getStaticProps({ params }) {
 	try {
 		console.log(`Fetching data for car with id: ${params.id}`);
@@ -17,31 +64,6 @@ export async function getStaticProps({ params }) {
 		console.error('Failed to fetch car data:', error);
 		return {
 			props: { car: null }, // Return null car if fetch fails
-		};
-	}
-}
-
-export async function getStaticPaths() {
-	try {
-		console.log('Fetching car paths');
-		const res = await fetch('http://localhost:3000/cars.json');
-		if (!res.ok) {
-			throw new Error('Failed to fetch cars list');
-		}
-		const data = await res.json();
-		console.log('Car paths fetched:', data);
-
-		const paths = data.map((car) => ({ params: { id: car.id } }));
-
-		return {
-			paths,
-			fallback: false,
-		};
-	} catch (error) {
-		console.error('Failed to fetch paths:', error);
-		return {
-			paths: [],
-			fallback: false,
 		};
 	}
 }
@@ -64,5 +86,4 @@ function Car({ car }) {
 		</>
 	);
 }
-
 export default Car;
