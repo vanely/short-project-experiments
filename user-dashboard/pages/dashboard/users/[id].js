@@ -23,4 +23,4 @@ const UserDetail = () => {
 	);
 };
 
-export default withAuth(UserDetail);
+export default UserDetail;
