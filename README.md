@@ -1,7 +1,2 @@
-## Simple Next.js User Dashboard
+## Experimental Space For Short Projects
 
-```
-git clone <this-repo>
-npm install
-npm run dev
-```
