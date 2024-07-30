@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model tasks {
+  id          String    @id @default("") @db.VarChar
+  title       String    @default("") @db.VarChar
+  description String    @default("") @db.VarChar
+  completed   Boolean   @default(false)
+  createdAt   DateTime? @db.Timestamp(6)
+}
+
+model User {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username          String             @unique @db.VarChar(50)
+  email             String             @unique @db.VarChar(255)
+  passwordHash      String             @map("password_hash") @db.VarChar(255)
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  lastLogin         DateTime?          @map("last_login") @db.Timestamptz
+  roles             UserRole[]
+  sessions          Session[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model Role {
+  id       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roleName String     @unique @map("role_name") @db.VarChar(50)
+  users    UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id") @db.Uuid
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId String @map("role_id") @db.Uuid
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model Session {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  ipAddress String?  @map("ip_address") @db.Inet
+  userAgent String?  @map("user_agent") @db.Text
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  token     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
