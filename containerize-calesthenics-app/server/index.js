@@ -3,7 +3,7 @@ const axios = require('axios');
 const mapboxgl = require('mapbox-gl');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3333;
 
 // Mapbox access token (replace with your own)
 mapboxgl.accessToken = process.env.MAPBOX_ACCESS_TOKEN;
