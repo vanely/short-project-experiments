@@ -19,13 +19,15 @@ async function getOverpassApiVersion() {
     }
 
     const data = await response.json();
-
+    // console.log(`JSON Data: ${JSON.stringify(data, null, 2)}`);
     if (data && data.generator) {
       const versionMatch = data.generator.match(/Overpass API (\S+)/);
+      console.log(`Version match: ${JSON.stringify(versionMatch, null, 2)}`)
       if (versionMatch && versionMatch[1]) {
         const version = versionMatch[1];
+        const majorAndMinor = version.slice(0, 3);
         console.log(`Overpass API version: ${version}`);
-        return version;
+        return majorAndMinor;
       }
     }
 
@@ -46,3 +48,7 @@ getOverpassApiVersion().then(version => {
     console.log("Failed to retrieve version.");
   }
 });
+
+module.exports = {
+  getOverpassApiVersion,
+}
