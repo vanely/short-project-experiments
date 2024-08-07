@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Map from '@arcgis/core/Map';
