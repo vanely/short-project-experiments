@@ -1,3 +1,6 @@
+Docker Optimized Containerization:
+1. https://youtu.be/rIrNIzy6U_g?si=kRxdLsHx2Ao_fzjB
+
 ArcGIS Documentation:
 
 1. Map Class:
