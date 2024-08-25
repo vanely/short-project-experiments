@@ -6,8 +6,9 @@ const file2 = './data_large.txt';
 function findConnections(filename) {
   let count = 0;
   const data = fs.readFileSync(filename, 'utf8').trim().split('\n');
+  // console.log(`data:\n${data}`);
   const grid = data.map(line => line.split('').map(Number));
-
+  // console.log(grid)
   const rows = grid.length;
   const cols = grid[0].length;
 

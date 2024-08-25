@@ -1,0 +1,12 @@
+{
+  "name": "connections-in-matrix",
+  "version": "1.0.0",
+  "main": "script.js",
+  "scripts": {
+    "script": "node ./script.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
