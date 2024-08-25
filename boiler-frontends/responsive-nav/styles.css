@@ -1,0 +1,116 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background-color: #333;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-links li {
+  border-bottom: 1px solid #444;
+}
+
+.nav-links li a {
+  display: block;
+  padding: 15px;
+  color: white;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.nav-links li a:hover {
+  background-color: #575757;
+}
+
+.content {
+  margin-left: 270px;
+  /* Space for the left navbar */
+  padding: 20px;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 30px;
+    width: 100%;
+    display: flex;
+    align-self: end;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    border-top: 1px solid #444;
+  }
+
+  .nav-links {
+    display: flex;
+    justify-content: space-evenly;
+    overflow-x: auto;
+    white-space: nowrap;
+    border-bottom: none;
+    flex-grow: 1;
+    /* Allow the nav-links to grow */
+    margin: 0;
+    /* Remove margins to fit the scroll buttons */
+  }
+
+  .nav-links li {
+    flex: none;
+  }
+
+  .scroll-btn {
+    background-color: #333;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 18px;
+    transition: background 0.3s;
+  }
+
+  .scroll-btn:hover {
+    background-color: #575757;
+  }
+
+  .scroll-btn.left {
+    margin-right: auto;
+    /* Push the left button to the far left */
+  }
+
+  .scroll-btn.right {
+    margin-left: auto;
+    /* Push the right button to the far right */
+  }
+
+  .content {
+    margin: 0;
+    /* Remove left margin for mobile */
+    padding: 20px;
+  }
+}
+
+/* Hide the scroll buttons on larger screens */
+@media (min-width: 769px) {
+  .scroll-btn {
+    display: none;
+    /* Hide buttons on larger screens */
+  }
+}

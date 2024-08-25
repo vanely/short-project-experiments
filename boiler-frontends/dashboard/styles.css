@@ -1,0 +1,73 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.left-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background-color: #333;
+  z-index: 1000;
+}
+
+.left-navbar .nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.left-navbar .nav-links li {
+  border-bottom: 1px solid #444;
+}
+
+.left-navbar .nav-links li a {
+  display: block;
+  padding: 15px;
+  color: white;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.left-navbar .nav-links li a:hover {
+  background-color: #575757;
+}
+
+.dashboard {
+  margin-left: 270px;
+  /* Space for the left navbar */
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  /* Responsive grid */
+  gap: 20px;
+  /* Space between items */
+}
+
+.dashboard-section {
+  background: #f4f4f4;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-section h2 {
+  margin-top: 0;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .left-navbar {
+    display: none;
+    /* Hide left navbar on mobile */
+  }
+
+  .dashboard {
+    margin-left: 0;
+    /* Remove left margin */
+  }
+}
