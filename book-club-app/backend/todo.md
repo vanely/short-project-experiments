@@ -54,4 +54,13 @@ models/types.ts
   coverImage: string; // may need to create a union type that represents possible image formats?
 ```
 
-
+BABE RECS:
+[] NOTE: add active and inactive fields for bookclubs
+[] NOTE: all book clubs to be public or private
+[] NOTE: add roles to bookclub: [admin, participant]
+[] NOTE: Theming:
+//       all users to add images for background, and change colors
+//       provide preset themes.
+//       upload pictures and generate color palette similar to google forms.
+[] NOTE: scheduling for bookclub conversations, that generates .ics calender events
+[] NOTE: Polling as an interactive chat feature.

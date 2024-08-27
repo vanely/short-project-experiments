@@ -1,15 +1,37 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/db';
-import { BookInterface } from './types'
+import { 
+  BannerImageInterface, 
+  BookClubAccessEnum, 
+  BookClubPostInterface, 
+  BookInterface, 
+  CoverImageInterface 
+} from './types'
 import User from './User';
 import Book from './Book';
+
+// NOTE: [x] add active and inactive fields for bookclubs
+// NOTE: [x] add bookclub banner field
+// NOTE: [] add posts field, interface should contain emojis(with ref to person who added), comments(allow users to be @ed)
+// NOTE: [] all book clubs to be public or private
+// NOTE: [] add roles to bookclub: [admin, participant]
+// NOTE: [] Theming:
+//       all users to add images for background, and change colors
+//       provide preset themes.
+//       upload pictures and generate color palette similar to google forms.
+// NOTE: [] scheduling for bookclub conversations, that generates .ics calender events
 
 class BookClub extends Model {
   public id!: number;
   public name!: string;
   public description!: string;
+  public banner!: BannerImageInterface;
+  public posts!: BookClubPostInterface[];
+  public coverImage!: CoverImageInterface;
   public createdBy!: number;
   public currentBookId!: number | null;
+  public active!: boolean;
+  public access!: BookClubAccessEnum;
   public books!: BookInterface[];
 }
 
@@ -22,6 +44,28 @@ BookClub.init({
     type: DataTypes.TEXT,
     allowNull: false,
   },
+  banner: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    validate: {
+      isValidCoverImage(value: BannerImageInterface) {
+        if (!value.url || typeof value.url !== 'string') {
+          throw new Error('Banner image must have a valid URL');
+        }
+      }
+    }
+  },
+  coverImage: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    validate: {
+      isValidCoverImage(value: CoverImageInterface) {
+        if (!value.url || typeof value.url !== 'string') {
+          throw new Error('Cover image must have a valid URL');
+        }
+      }
+    }
+  },
   createdBy: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -29,6 +73,14 @@ BookClub.init({
   currentBookId: {
     type: DataTypes.INTEGER,
     allowNull: true,
+  },
+  active: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  access: {
+    type: DataTypes.ENUM('public', 'private'),
+    defaultValue: 'private',
   },
   books: {
     type: DataTypes.JSONB,

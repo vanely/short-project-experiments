@@ -19,6 +19,7 @@ sequelize.sync({ alter: true }).then(() => {
 }).catch((error: Error) => console.error(`Sequelize Sync Error:\n${error}`));
 
 // session context namespace
+// https://github.com/jeff-lewis/cls-hooked#readme
 export const sessionNamespace = createNamespace('currentSession');
 
 // middleware

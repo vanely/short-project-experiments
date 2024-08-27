@@ -1,7 +1,8 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { User } from '../models/User';
+import User from '../models/User';
+import { UserInterface } from '../models/types';
 
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
   try {
@@ -39,9 +40,9 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-// change user type for user model interface
 passport.serializeUser((user: unknown, done) => {
-  done(null, user.id);
+  const typedUser = user as UserInterface;
+  done(null, typedUser.id);
 })
 
 passport.deserializeUser((id: number, done) => {

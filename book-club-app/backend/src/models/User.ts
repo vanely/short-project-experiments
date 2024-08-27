@@ -1,8 +1,9 @@
 import { Model, DataTypes } from 'sequelize';
-import sequelize from '../config/db';
 // import bcrypt from 'bcrypt';
 import argon2 from 'argon2';
 import crypto from 'crypto';
+import sequelize from '../config/db';
+import { BookClubInterface } from './types';
 
 class User extends Model {
   public id!: number;
@@ -11,6 +12,7 @@ class User extends Model {
   public passwordSalt!: string;
   public name!: string;
   public googleId!: string | null;
+  public bookClubs!: BookClubInterface[];
 
   public async validatePassword(password: string): Promise<boolean> {
     const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
@@ -39,6 +41,10 @@ User.init({
   googleId: {
     type: DataTypes.STRING,
     allowNull: true,
+  },
+  bookClubs: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
   }
 }, {
   sequelize,
