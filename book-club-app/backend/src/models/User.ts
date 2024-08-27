@@ -3,7 +3,7 @@ import { Model, DataTypes } from 'sequelize';
 import argon2 from 'argon2';
 import crypto from 'crypto';
 import sequelize from '../config/db';
-import { BookClubInterface } from './types';
+import { BookClubInterface, SoloReadingListInterface } from './types';
 
 class User extends Model {
   public id!: number;
@@ -13,6 +13,7 @@ class User extends Model {
   public name!: string;
   public googleId!: string | null;
   public bookClubs!: BookClubInterface[];
+  public soloReadingLists!: SoloReadingListInterface[];
 
   public async validatePassword(password: string): Promise<boolean> {
     const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
@@ -43,6 +44,10 @@ User.init({
     allowNull: true,
   },
   bookClubs: {
+    type: DataTypes.JSONB,
+    defaultValue: [],
+  },
+  soloReadingLists: {
     type: DataTypes.JSONB,
     defaultValue: [],
   }
