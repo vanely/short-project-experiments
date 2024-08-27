@@ -39,13 +39,19 @@ passport.serializeUser((user: unknown, done) => {
 })
 ```
 
-create a meaningful and secure pepper for this env var(used on line 50 as well)
+[] create a meaningful and secure pepper for this env var(used on line 50 as well)
 models/User.ts
 ```js
   public async validatePassword(password: string): Promise<boolean> {
     const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
     return argon2.verify(this.password, `${password}${this.passwordSalt}${pepper}`);
   }
+```
+
+[] may need to create a union type that represents image formats
+models/types.ts
+```js
+  coverImage: string; // may need to create a union type that represents possible image formats?
 ```
 
 
