@@ -3,6 +3,8 @@ import sequelize from '../config/db';
 import User from './User';
 import { BannerImageInterface, BookInterface, CoverImageInterface, SoloReadingListEnum } from './types';
 
+// NOTE: should keep track of users who subscribe to a public reading list
+//       create a tagging system for filtering beyond genre
 class SoloReadingList extends Model {
   public id!: number;
   public createdBy!: number;
