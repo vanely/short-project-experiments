@@ -33,7 +33,20 @@ export const createNewReadingList = async (readdingList: SoloReadingListInterfac
 
 // add books to reading list
 // these will either come from a catalog reference, or we could search for them in our db using our custom model.
+// may be optimal to add
 export const addBooksToReadingList = async (books: BookInterface[]) => {
   // if we're getting them from the db the function param will be an aray of ids[]
   // if we're getting them from an api catalog
+}
+
+export const updateBookStatusInReadingList = async (book: BookInterface) => {
+
+}
+
+export const updateReadingListStatus = async (readingList: SoloReadingListInterface) => {
+  
+}
+
+export const getReadingLists = async () => {
+
 }
