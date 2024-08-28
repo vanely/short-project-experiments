@@ -1,14 +1,24 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/db';
 import User from './User';
-import { FriendRequestEnum } from './types';
+import { FriendRequestStatusEnum } from './types';
 
 class FriendRequest extends Model {
   public id!: number;
-  public status!: FriendRequestEnum;
+  public fromUserId!: number;
+  public toUserId!: number;
+  public status!: FriendRequestStatusEnum;
 }
 
 FriendRequest.init({
+  fromUserId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  toUserId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
   status: {
     type: DataTypes.ENUM('pending', 'accepted', 'rejected'),
     defaultValue: 'pending',

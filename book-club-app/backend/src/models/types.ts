@@ -1,10 +1,14 @@
-export type BookClubRole = 'admin' | 'participant'
 export type ImageFormat = 'jpg' | 'jpeg' | 'png' | 'gif' | 'webp' | 'svg' | undefined;
 
-export enum FriendRequestEnum {
+export enum FriendRequestStatusEnum {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   REJECTED = 'rejected',
+}
+
+export enum BookClubRolesEnum {
+  ADMIN = 'admin',
+  PARTICIPANT = 'participant',
 }
 
 export enum BookClubAccessEnum {
@@ -40,13 +44,19 @@ export interface BookInterface {
   bookApiReference: string;
 }
 
+export interface BookClubMembersInterface {
+  userId: number;
+  role: BookClubRolesEnum;
+}
+
 export interface BookClubInterface {
   id: number;
   name: string;
   description: string;
   banner: BannerImageInterface;
-  posts: BookClubPostInterface[];
   coverImage: CoverImageInterface;
+  members: BookClubMembersInterface[];
+  posts: BookClubPostInterface[];
   createdBy: number;
   currentBookId: number | null;
   active: boolean;
@@ -76,6 +86,13 @@ export interface UserInterface {
   googleId: string | null;
   bookClubs: BookClubInterface[];
   validatePassword(password: string): Promise<boolean> 
+}
+
+export interface FriendRequestInterface {
+  id: number;
+  fromUserId: number;
+  toUserId: number;
+  status: FriendRequestStatusEnum;
 }
 
 // NOTE: use this or something similar in frontend for emojies https://github.com/missive/emoji-mart?tab=readme-ov-file
