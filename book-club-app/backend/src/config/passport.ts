@@ -40,7 +40,7 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-passport.serializeUser((user: unknown, done) => {
+passport.serializeUser((user: Express.User, done) => {
   const typedUser = user as UserInterface;
   done(null, typedUser.id);
 })
