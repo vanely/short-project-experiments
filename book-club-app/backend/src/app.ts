@@ -4,6 +4,7 @@ import session from 'express-session';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import sequelize, { connectToDB } from './config/db';
+import { authenticationMiddleware } from './middleware/auth';
 import { sessionMiddleware } from './middleware/session';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
@@ -32,6 +33,8 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+// REVIEW: if I include the auth middleware here, do I still need to add it to routes? And, do I need the below, and the above session refs
+app.use(authenticationMiddleware);
 app.use(sessionMiddleware);
 
 // routes
