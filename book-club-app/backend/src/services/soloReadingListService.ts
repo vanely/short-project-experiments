@@ -14,6 +14,9 @@ export const createNewReadingList = async (readdingList: SoloReadingListInterfac
     active,
   } = readdingList;
   
+  // make sure to check for duplicate names, 
+  // if the reading list is private look only in users lists.
+  // if the reading list is public check against all public lists.
   try {
     const newReadingList: SoloReadingList = await SoloReadingList.create({
       createdBy,
@@ -44,7 +47,7 @@ export const updateBookStatusInReadingList = async (book: BookInterface) => {
 }
 
 export const updateReadingListStatus = async (readingList: SoloReadingListInterface) => {
-  
+
 }
 
 export const getReadingLists = async () => {

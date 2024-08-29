@@ -14,6 +14,8 @@ class User extends Model {
   public googleId!: string | null;
   public bookClubs!: BookClubInterface[];
   public soloReadingLists!: SoloReadingListInterface[];
+  public createdAt!: Date;
+  public updatedAt!: Date;
 
   public async validatePassword(password: string): Promise<boolean> {
     const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
@@ -50,6 +52,16 @@ User.init({
   soloReadingLists: {
     type: DataTypes.JSONB,
     defaultValue: [],
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   }
 }, {
   sequelize,

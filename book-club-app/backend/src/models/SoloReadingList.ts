@@ -10,12 +10,15 @@ class SoloReadingList extends Model {
   public createdBy!: number;
   public name!: string;
   public description!: string;
+  public upVotes!: number;
   public banner!: BannerImageInterface;
   public coverImage!: CoverImageInterface;
   public currentBookId!: number | null;
   public active!: boolean;
   public access!: SoloReadingListEnum;
   public bookList!: BookInterface[];
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 SoloReadingList.init({
@@ -25,6 +28,10 @@ SoloReadingList.init({
   },
   description: {
     type: DataTypes.TEXT,
+  },
+  upVotes: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   },
   banner: {
     type: DataTypes.JSONB,
@@ -63,6 +70,16 @@ SoloReadingList.init({
   bookList: {
     type: DataTypes.JSONB,
     defaultValue: [],
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   }
 }, {
   sequelize,

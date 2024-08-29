@@ -36,6 +36,8 @@ class BookClub extends Model {
   public active!: boolean;
   public access!: BookClubAccessEnum;
   public books!: BookInterface[];
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 BookClub.init({
@@ -92,6 +94,16 @@ BookClub.init({
   books: {
     type: DataTypes.JSONB,
     defaultValue: [],
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
   }
 }, {
   sequelize,

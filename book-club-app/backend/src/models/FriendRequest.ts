@@ -8,6 +8,8 @@ class FriendRequest extends Model {
   public fromUserId!: number;
   public toUserId!: number;
   public status!: FriendRequestStatusEnum;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 FriendRequest.init({
@@ -23,6 +25,16 @@ FriendRequest.init({
     type: DataTypes.ENUM('pending', 'accepted', 'rejected'),
     defaultValue: 'pending',
   },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  }
 }, {
   sequelize,
   modelName: 'FriendRequest',

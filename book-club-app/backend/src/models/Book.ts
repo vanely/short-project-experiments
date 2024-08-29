@@ -16,6 +16,8 @@ class Book extends Model {
   public startDate!: Date;
   public endDate!: Date;
   public bookApiReference!: string;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 Book.init({
@@ -53,7 +55,17 @@ Book.init({
   },
   bookApiReference: {
     type: DataTypes.STRING,
-  }
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
 }, {
   sequelize,
   modelName: 'Book',

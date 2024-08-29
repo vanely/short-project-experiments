@@ -42,6 +42,8 @@ export interface BookInterface {
   startDate: Date; // set when switched to inProgress
   endDate: Date; // set when switched to completed
   bookApiReference: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface BookClubMembersInterface {
@@ -69,12 +71,15 @@ export interface SoloReadingListInterface {
   createdBy: number;
   name: string;
   description: string;
+  upVotes: number;
   banner: BannerImageInterface;
   coverImage: CoverImageInterface;
   currentBookId: number | null;
   active: boolean;
   access: SoloReadingListEnum;
   bookList: BookInterface[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface UserInterface {
@@ -85,6 +90,8 @@ export interface UserInterface {
   name: string;
   googleId: string | null;
   bookClubs: BookClubInterface[];
+  createdAt: Date;
+  updatedAt: Date;
   validatePassword(password: string): Promise<boolean> 
 }
 
@@ -93,6 +100,8 @@ export interface FriendRequestInterface {
   fromUserId: number;
   toUserId: number;
   status: FriendRequestStatusEnum;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // NOTE: use this or something similar in frontend for emojies https://github.com/missive/emoji-mart?tab=readme-ov-file
