@@ -1,5 +1,4 @@
 import { Model, DataTypes } from 'sequelize';
-// import bcrypt from 'bcrypt';
 import argon2 from 'argon2';
 import crypto from 'crypto';
 import sequelize from '../config/db';
@@ -24,6 +23,11 @@ class User extends Model {
 }
 
 User.init({
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -66,6 +70,8 @@ User.init({
 }, {
   sequelize,
   modelName: 'User',
+  tableName: 'users',
+  timestamps: true,
   hooks: {
     beforeCreate: async (user: User) => {
       if (user.password) {
@@ -79,7 +85,34 @@ User.init({
         });
       }
     }
-  }
+  },
+  indexes: [
+    {
+      name: 'idx_user_email',
+      fields: ['email'],
+      unique: true,
+    },
+    {
+      name: 'idx_user_firstname',
+      fields: ['firstName'],
+    },
+    {
+      name: 'idx_user_lastname',
+      fields: ['lastName'],
+    },
+    {
+      name: 'idx_user_created_at',
+      fields: ['createdAt'],
+    },
+    {
+      name: 'idx_user_book_clubs',
+      fields: ['bookClubs'],
+    },
+    {
+      name: 'idx_user_solo_reading_lists',
+      fields: ['soloReadingLists'],
+    }
+  ]
 })
 
 export default User;

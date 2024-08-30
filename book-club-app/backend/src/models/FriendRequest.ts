@@ -38,6 +38,8 @@ FriendRequest.init({
 }, {
   sequelize,
   modelName: 'FriendRequest',
+  tableName: 'friendRequests',
+  timestamps: true,
 });
 
 // associations

@@ -84,6 +84,30 @@ SoloReadingList.init({
 }, {
   sequelize,
   modelName: 'SoloReadingList',
+  tableName: 'soloReadingLists',
+  timestamps: true,
+  indexes: [
+    {
+      name: 'idx_bookclub_name',
+      fields: ['name'],
+    },
+    {
+      name: 'idx_bookclub_current_book',
+      fields: ['currentBookId'],
+    },
+    {
+      name: 'idx_bookclub_active',
+      fields: ['active'],
+    },
+    {
+      name: 'idx_bookclub_access',
+      fields: ['access'],
+    },
+    {
+      name: 'idx_bookclub_book_list',
+      fields: ['bookList'],
+    },
+  ],
 });
 
 // associations

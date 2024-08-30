@@ -1,7 +1,15 @@
 import { Sequelize } from 'sequelize';
 
 const sequelize = new Sequelize(process.env.DATABASE_URL || 'postgres://user:password@localhost:5432/bookclub', {
+  host: 'localhost',
   dialect: 'postgres',
+  logging: true,
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30_000,
+    idle: 5_000,
+  }
 });
 
 export const connectToDB = async () => {

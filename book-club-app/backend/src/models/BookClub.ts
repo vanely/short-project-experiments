@@ -35,12 +35,17 @@ class BookClub extends Model {
   public currentBookId!: number | null;
   public active!: boolean;
   public access!: BookClubAccessEnum;
-  public books!: BookInterface[];
+  public bookList!: BookInterface[];
   public createdAt!: Date;
   public updatedAt!: Date;
 }
 
 BookClub.init({
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -91,7 +96,7 @@ BookClub.init({
     type: DataTypes.ENUM('public', 'private'),
     defaultValue: 'private',
   },
-  books: {
+  bookList: {
     type: DataTypes.JSONB,
     defaultValue: [],
   },
@@ -108,6 +113,38 @@ BookClub.init({
 }, {
   sequelize,
   modelName: 'BookClub',
+  tableName: 'bookClubs',
+  timestamps: true,
+  indexes: [
+    {
+      name: 'idx_bookclub_name',
+      fields: ['name'],
+    },
+    {
+      name: 'idx_bookclub_members',
+      fields: ['members'],
+    },
+    {
+      name: 'idx_bookclub_posts',
+      fields: ['posts'],
+    },
+    {
+      name: 'idx_bookclub_current_book',
+      fields: ['currentBookId'],
+    },
+    {
+      name: 'idx_bookclub_active',
+      fields: ['active'],
+    },
+    {
+      name: 'idx_bookclub_access',
+      fields: ['access'],
+    },
+    {
+      name: 'idx_bookclub_book_list',
+      fields: ['bookList'],
+    },
+  ]
 });
 
 // associations

@@ -69,6 +69,14 @@ Book.init({
 }, {
   sequelize,
   modelName: 'Book',
+  tableName: 'books',
+  timestamps: true,
+  indexes: [
+    {
+      name: 'idx_book_title',
+      fields: ['title'],
+    }
+  ]
 });
 
 export default Book;

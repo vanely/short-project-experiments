@@ -63,7 +63,7 @@ export interface BookClubInterface {
   currentBookId: number | null;
   active: boolean;
   access: BookClubAccessEnum;
-  books: BookInterface[];
+  bookList: BookInterface[];
 }
 
 export interface SoloReadingListInterface {
