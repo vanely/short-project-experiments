@@ -1,3 +1,13 @@
+Immediate:
+[] set up controllers.
+[] add rough service functions for controllers.
+[] add respective routes.
+[] set up local postgres db
+[] create meaningful env vars where needed
+    - [] start addressing the below
+[] run API, and test endpoint additions.
+
+___________________________________________________________________________________
 [] look into what the last 2 options are, and what a session secret should be(likely a uuid, or concatination of a few, maybe even some decodable hashed value)
 
 app.ts

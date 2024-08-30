@@ -1,9 +1,12 @@
-import { Model, DataTypes } from 'sequelize';
+import { Model, DataTypes, Association } from 'sequelize';
 import argon2 from 'argon2';
 import crypto from 'crypto';
 import sequelize from '../config/db';
-import { BookClubInterface, SoloReadingListInterface } from './types';
+import { BookClubInterface, FriendRequestInterface, SoloReadingListInterface } from './types';
+import FriendRequest from './FriendRequest';
 
+// REVIEW: it may not be the best idea to keep the password here? Or is it since it's encrypted? 
+//         May just have to remove it from user requests, or write queries that don't return it at all.
 class User extends Model {
   public id!: number;
   public email!: string;
@@ -13,12 +16,26 @@ class User extends Model {
   public googleId!: string | null;
   public bookClubs!: BookClubInterface[];
   public soloReadingLists!: SoloReadingListInterface[];
+  public friendRequests!: FriendRequestInterface[];
+  public friends!: number[];
   public createdAt!: Date;
   public updatedAt!: Date;
+
+  public static associations: {
+    friends: Association<User, User>;
+    sentFriendRequests: Association<User, FriendRequest>;
+    receivedFriendRequests: Association<User, FriendRequest>;
+  }
 
   public async validatePassword(password: string): Promise<boolean> {
     const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
     return argon2.verify(this.password, `${password}${this.passwordSalt}${pepper}`);
+  }
+
+  // get user model without password
+  public toSafeObject(): Partial<User> {
+    const { id, email, name, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt } = this;
+    return { id, email, name, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt };
   }
 }
 
@@ -50,11 +67,19 @@ User.init({
     allowNull: true,
   },
   bookClubs: {
-    type: DataTypes.JSONB,
+    type: DataTypes.ARRAY(DataTypes.INTEGER),
     defaultValue: [],
   },
   soloReadingLists: {
-    type: DataTypes.JSONB,
+    type: DataTypes.ARRAY(DataTypes.INTEGER),
+    defaultValue: [],
+  },
+  friendRequests: {
+    type: DataTypes.ARRAY(DataTypes.INTEGER),
+    defaultValue: [],
+  },
+  friends: {
+    type: DataTypes.ARRAY(DataTypes.INTEGER),
     defaultValue: [],
   },
   createdAt: {
@@ -114,5 +139,23 @@ User.init({
     }
   ]
 })
+
+// confirm these are ok
+User.belongsToMany(User, {
+  as: 'friends',
+  through: 'UserFriends',
+  foreignKey: 'userId',
+  otherKey: 'friendId'
+});
+
+User.hasMany(FriendRequest, {
+  as: 'sentFriendRequests',
+  foreignKey: 'fromId'
+});
+
+User.hasMany(FriendRequest, {
+  as: 'receivedFriendRequests',
+  foreignKey: 'toId'
+});
 
 export default User;

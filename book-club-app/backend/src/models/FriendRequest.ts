@@ -3,6 +3,8 @@ import sequelize from '../config/db';
 import User from './User';
 import { FriendRequestStatusEnum } from './types';
 
+// NOTE: allow these to be deleted in by sender, 
+//       actually just ask user in UI if they're sure they want to send 
 class FriendRequest extends Model {
   public id!: number;
   public fromUserId!: number;
