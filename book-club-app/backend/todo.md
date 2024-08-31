@@ -1,4 +1,7 @@
 Immediate:
+[] put together foreign key associations.
+   - reference claude chat: https://claude.ai/chat/650451f1-2ab6-48ca-92bd-ab5a6f25484e
+   - reference sequelize association docs: https://sequelize.org/docs/v6/core-concepts/assocs/
 [] set up controllers.
 [] add rough service functions for controllers.
 [] add respective routes.
