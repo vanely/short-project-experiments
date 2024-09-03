@@ -1,39 +1,49 @@
-import { Model, DataTypes, Association } from 'sequelize';
+import {
+  Model, 
+  DataTypes, 
+  Association, 
+  InferAttributes, 
+  InferCreationAttributes, 
+  CreationOptional, 
+  NonAttribute 
+} from 'sequelize';
 import argon2 from 'argon2';
 import crypto from 'crypto';
 import sequelize from '../config/db';
-import { BookClubInterface, FriendRequestInterface, SoloReadingListInterface } from './types';
 import FriendRequest from './FriendRequest';
+import BookClub from './BookClub';
+import SoloReadingList from './SoloReadingList';
 
-// REVIEW: it may not be the best idea to keep the password here? Or is it since it's encrypted? 
-//         May just have to remove it from user requests, or write queries that don't return it at all.
-class User extends Model {
-  public id!: number;
-  public email!: string;
-  public password!: string;
-  public passwordSalt!: string;
-  public name!: string;
-  public googleId!: string | null;
-  public bookClubs!: BookClubInterface[];
-  public soloReadingLists!: SoloReadingListInterface[];
-  public friendRequests!: FriendRequestInterface[];
-  public friends!: number[];
-  public createdAt!: Date;
-  public updatedAt!: Date;
+class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+  declare id: CreationOptional<number>;
+  declare email: string;
+  declare password: string | null;
+  declare passwordSalt: string;
+  declare name: string;
+  declare googleId: string | null;
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
 
-  public static associations: {
+  // associations
+  declare friendRequests?: NonAttribute<FriendRequest[]>;
+  declare bookClubs?: NonAttribute<BookClub[]>;
+  declare soloReadingLists?: NonAttribute<SoloReadingList[]>;
+  declare friends?: NonAttribute<User[]>;
+
+  declare static associations: {
+    friendRequests: Association<User, FriendRequest>;
+    bookClubs: Association<User, BookClub>;
+    soloReadingLists: Association<User, SoloReadingList>;
     friends: Association<User, User>;
-    sentFriendRequests: Association<User, FriendRequest>;
-    receivedFriendRequests: Association<User, FriendRequest>;
-  }
+  };
 
-  public async validatePassword(password: string): Promise<boolean> {
+  async validatePassword(password: string): Promise<boolean> {
     const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
-    return argon2.verify(this.password, `${password}${this.passwordSalt}${pepper}`);
+    return this.password ? argon2.verify(this.password, `${password}${this.passwordSalt}${pepper}`) : false;
   }
 
   // get user model without password
-  public toSafeObject(): Partial<User> {
+  toSafeObject(): Partial<User> {
     const { id, email, name, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt } = this;
     return { id, email, name, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt };
   }
@@ -66,22 +76,6 @@ User.init({
     type: DataTypes.STRING,
     allowNull: true,
   },
-  bookClubs: {
-    type: DataTypes.ARRAY(DataTypes.INTEGER),
-    defaultValue: [],
-  },
-  soloReadingLists: {
-    type: DataTypes.ARRAY(DataTypes.INTEGER),
-    defaultValue: [],
-  },
-  friendRequests: {
-    type: DataTypes.ARRAY(DataTypes.INTEGER),
-    defaultValue: [],
-  },
-  friends: {
-    type: DataTypes.ARRAY(DataTypes.INTEGER),
-    defaultValue: [],
-  },
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -91,7 +85,7 @@ User.init({
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: DataTypes.NOW,
-  }
+  },
 }, {
   sequelize,
   modelName: 'User',
@@ -104,7 +98,7 @@ User.init({
         const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
         user.password = await argon2.hash(`${user.password}${user.passwordSalt}${pepper}`, {
           type: argon2.argon2id,
-          memoryCost: 2**16,
+          memoryCost: 2 ** 16,
           timeCost: 3,
           parallelism: 1,
         });
@@ -136,30 +130,45 @@ User.init({
     {
       name: 'idx_user_solo_reading_lists',
       fields: ['soloReadingLists'],
-    }
-  ]
+    },
+  ],
+});
+
+// associations
+User.hasMany(FriendRequest, {
+  as: 'userHasReceivedFriendRequests',
+  foreignKey: 'toId',
+});
+
+User.hasMany(FriendRequest, {
+  as: 'userHasSentFriendRequests',
+  foreignKey: 'fromId',
 })
 
-// confirm these are ok
+User.belongsToMany(BookClub, {
+  as: 'userBelongsToBookClubs',
+  through: 'UserBookClubs',
+});
+
+// REVIEW: add has many bookClubs
+User.hasMany(BookClub, {
+  as: 'userHasBookClubs',
+  foreignKey: 'userId',
+})
+
+User.belongsToMany(SoloReadingList, {
+  as: 'userBelongsToReadingLists',
+  through: 'UserReadingLists',
+})
+
+User.hasMany(SoloReadingList, {
+  as: 'userHasSoloReadingLists',
+  foreignKey: 'userId',
+});
+
 User.belongsToMany(User, {
   as: 'friends',
   through: 'UserFriends',
-  foreignKey: 'userId',
-  otherKey: 'friendId'
-});
-
-// NOTE: the 'as' field is usded to create an alias for the association,
-//       - When you use the as option, 
-//         Sequelize will use this alias to name the association methods it generates,
-//         instead of using the model name. 
-User.hasMany(FriendRequest, {
-  as: 'sentFriendRequests',
-  foreignKey: 'fromId'
-});
-
-User.hasMany(FriendRequest, {
-  as: 'receivedFriendRequests',
-  foreignKey: 'toId'
 });
 
 export default User;

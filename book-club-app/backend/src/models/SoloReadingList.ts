@@ -1,27 +1,59 @@
-import { Model, DataTypes } from 'sequelize';
+import {
+  Model,
+  DataTypes,
+  Association,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute,
+  ForeignKey,
+} from 'sequelize';
 import sequelize from '../config/db';
 import User from './User';
-import { BannerImageInterface, BookInterface, CoverImageInterface, SoloReadingListEnum } from './types';
+import {
+  BannerImageInterface,
+  BookInterface,
+  CoverImageInterface,
+  SoloReadingListEnum
+} from './types';
 
 // NOTE: should keep track of users who subscribe to a public reading list
 //       create a tagging system for filtering beyond genre
-class SoloReadingList extends Model {
-  public id!: number;
-  public createdBy!: number;
-  public name!: string;
-  public description!: string;
-  public upVotes!: number;
-  public banner!: BannerImageInterface;
-  public coverImage!: CoverImageInterface;
-  public currentBookId!: number | null;
-  public active!: boolean;
-  public access!: SoloReadingListEnum;
-  public bookList!: BookInterface[];
-  public createdAt!: Date;
-  public updatedAt!: Date;
+// REVIEW: using the models themselves as types result in circular imports, is this ok, since they're just being used as types?
+class SoloReadingList extends Model<InferAttributes<SoloReadingList>, InferCreationAttributes<SoloReadingList>> {
+  declare id: CreationOptional<number>;
+  declare userId: ForeignKey<User['id']>;
+  declare name: string;
+  declare description: string;
+  declare upVotes: number;
+  declare banner: BannerImageInterface;
+  declare coverImage: CoverImageInterface;
+  // should probably be book interface
+  declare currentBook: BookInterface;
+  declare active: boolean;
+  declare access: SoloReadingListEnum;
+  declare bookList: BookInterface[];
+  declare createdAt: Date;
+  declare updatedAt: Date;
+
+  declare user?: NonAttribute<User>;
+
+  declare static associations: {
+    user: Association<SoloReadingList, User>;
+  }
 }
 
 SoloReadingList.init({
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    unique: true,
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -55,8 +87,8 @@ SoloReadingList.init({
       }
     }
   },
-  currentBookId: {
-    type: DataTypes.INTEGER,
+  currentBook: {
+    type: DataTypes.JSONB,
     allowNull: true,
   },
   active: {
@@ -93,7 +125,7 @@ SoloReadingList.init({
     },
     {
       name: 'idx_bookclub_current_book',
-      fields: ['currentBookId'],
+      fields: ['currentBook'],
     },
     {
       name: 'idx_bookclub_active',
@@ -111,7 +143,13 @@ SoloReadingList.init({
 });
 
 // associations
-SoloReadingList.belongsTo(User);
-User.hasMany(SoloReadingList);
+SoloReadingList.belongsToMany(User, {
+  as: 'readingListBelongsToUsers',
+  through: 'ReadingListInUsers',
+});
+SoloReadingList.hasMany(User, {
+  as: 'readingListHasUsers',
+  foreignKey: 'readingListId',
+});
 
 export default SoloReadingList;
