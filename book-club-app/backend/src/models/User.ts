@@ -148,6 +148,10 @@ User.belongsToMany(User, {
   otherKey: 'friendId'
 });
 
+// NOTE: the 'as' field is usded to create an alias for the association,
+//       - When you use the as option, 
+//         Sequelize will use this alias to name the association methods it generates,
+//         instead of using the model name. 
 User.hasMany(FriendRequest, {
   as: 'sentFriendRequests',
   foreignKey: 'fromId'
