@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import { Request, Response } from 'express';
 import User from '../models/User';
 import { AppError } from '../utils/appError';
@@ -8,7 +9,7 @@ export class UserController {
       // validation should be done to make sure required fields are present
       const user = await User.create(
         req.body,
-        { fields: ['firstName', 'lastName', 'email', 'password'] }
+        { fields: ['firstName', 'lastName', 'username', 'email', 'password'] }
       )
       if (!user) {
         throw new AppError('Unable to create user', 400);
@@ -66,12 +67,18 @@ export class UserController {
   static async searchUsers(req: Request, res: Response) {
     try {
       const { query } = req.query;
-      const users = await User.find({
-        $or: [
-          { name: { $regex: query, $options: 'i' } },
-          { email: { $regex: query, $options: 'i' } }
-        ]
-      }).select('name email');
+      const users = await User.findAndCountAll({
+        where: {
+          username: {
+            [Op.like]: `${query}%`,
+          },
+          firstName: {
+            [Op.like]: `${query}%`,
+          },
+        },
+        offset: 5,
+        limit: 5,
+      });
       res.json(users);
     } catch (error) {
       res.status(500).json({ message: 'Internal server error' });

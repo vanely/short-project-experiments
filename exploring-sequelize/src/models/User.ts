@@ -13,6 +13,7 @@ import sequelize from '../config/db';
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<number>;
   declare email: string;
+  declare username: string;
   declare password: string | null;
   declare firstName: string;
   declare lastName: string;
@@ -25,8 +26,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
 
   // get user model without password
   toSafeObject(): Partial<User> {
-    const { id, email, firstName, lastName } = this;
-    return { id, email, firstName, lastName };
+    const { id, username, email, firstName, lastName } = this;
+    return { id, username, email, firstName, lastName };
   }
 }
 
@@ -35,6 +36,11 @@ User.init({
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
+  },
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true;
   },
   email: {
     type: DataTypes.STRING,
@@ -59,6 +65,11 @@ User.init({
   tableName: 'users',
   timestamps: true,
   indexes: [
+    {
+      name: 'idx_username',
+      fields: ['username'],
+      unique: true,
+    },
     {
       name: 'idx_user_email',
       fields: ['email'],
