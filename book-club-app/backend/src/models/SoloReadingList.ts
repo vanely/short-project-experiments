@@ -147,9 +147,10 @@ SoloReadingList.belongsToMany(User, {
   as: 'readingListBelongsToUsers',
   through: 'ReadingListInUsers',
 });
-SoloReadingList.hasMany(User, {
-  as: 'readingListHasUsers',
-  foreignKey: 'readingListId',
-});
+
+// SoloReadingList.hasMany(User, {
+//   as: 'readingListHasUsers',
+//   foreignKey: 'readingListId',
+// });
 
 export default SoloReadingList;

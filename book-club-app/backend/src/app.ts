@@ -18,6 +18,9 @@ const app = express();
 connectToDB();
 
 // sync db models
+// NOTE: 'alter', and 'force' options are both destructive, 
+// 'force' drops tables and recreates, 'alter' updates tables with new changes, 
+// both operations should be performed via migrations scripts.
 sequelize.sync({ alter: true }).then(() => {
   console.log('Database Synced');
 }).catch((error: Error) => console.error(`Sequelize Sync Error:\n${error}`));
