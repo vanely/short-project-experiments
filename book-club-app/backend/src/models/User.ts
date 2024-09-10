@@ -19,7 +19,9 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare email: string;
   declare password: string | null;
   declare passwordSalt: string;
-  declare name: string;
+  declare username: string;
+  declare firstName: string;
+  declare lastName: string;
   declare googleId: string | null;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
@@ -38,14 +40,14 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   };
 
   async validatePassword(password: string): Promise<boolean> {
-    const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
+    const pepper: string = process.env.PASSWORD_PEPPER as string;
     return this.password ? argon2.verify(this.password, `${password}${this.passwordSalt}${pepper}`) : false;
   }
 
   // get user model without password
   toSafeObject(): Partial<User> {
-    const { id, email, name, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt } = this;
-    return { id, email, name, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt };
+    const { id, email, username, firstName, lastName, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt } = this;
+    return { id, email, username, firstName, lastName, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt };
   }
 }
 
@@ -68,7 +70,15 @@ User.init({
     type: DataTypes.STRING(32),
     allowNull: false,
   },
-  name: {
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  firstName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  lastName: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -95,7 +105,7 @@ User.init({
     beforeCreate: async (user: User) => {
       if (user.password) {
         user.passwordSalt = await crypto.randomBytes(16).toString('hex');
-        const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
+        const pepper: string = process.env.PASSWORD_PEPPER as string;
         user.password = await argon2.hash(`${user.password}${user.passwordSalt}${pepper}`, {
           type: argon2.argon2id,
           memoryCost: 2 ** 16,

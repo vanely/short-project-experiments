@@ -26,7 +26,7 @@ export interface CoverImageInterface {
   format: ImageFormat;
 }
 
-export interface BannerImageInterface extends CoverImageInterface{}
+export interface BannerImageInterface extends CoverImageInterface { }
 
 export interface BookInterface {
   id: number;

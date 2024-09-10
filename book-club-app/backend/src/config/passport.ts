@@ -21,20 +21,22 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, passwor
 }));
 
 passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID || '',
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+  clientID: process.env.GOOGLE_CLIENT_ID as string,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
   callbackURL: '/auth/google/callback',
-}, async (accessToken, refreshToken, profile, done) => {
+  passReqToCallback: true,
+}, async (req, accessToken, refreshToken, profile, done) => {
   try {
-    let user = await User.findOne({ where: { googleId: profile.id } });
-    if (!user) {
-      user = await User.create({
-        googleId: profile.id,
-        email: profile.emails?.[0].value,
-        name: profile.displayName,
+    console.log(`Google Oauth profile 'passport.ts'\n${profile}`)
+    const existingUser = await User.findOne({ where: { googleId: profile.id } });
+    if (!existingUser) {
+      const newUser = await User.create({
+        googleId: (profile.id as unknown) as string,
+        email: (profile.emails?.[0].value as unknown) as string,
+        firstName: (profile.displayName as unknown) as string,
       });
+      return done(null, newUser);
     }
-    return done(null, user);
   } catch (error) {
     return done(error as Error)
   }

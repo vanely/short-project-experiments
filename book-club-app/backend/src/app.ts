@@ -2,7 +2,7 @@ import express, { application } from 'express';
 import passport from 'passport';
 import session from 'express-session';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import dotenvx from '@dotenvx/dotenvx';
 import sequelize, { connectToDB } from './config/db';
 import { authenticationMiddleware } from './middleware/auth';
 import { sessionMiddleware } from './middleware/session';
@@ -11,7 +11,7 @@ import userRoutes from './routes/user';
 import bookClubRoutes from './routes/bookClub';
 import soloReadingListRoutes from './routes/soloReadingList';
 
-dotenv.config()
+dotenvx.config()
 const app = express();
 
 // connect to database
@@ -35,6 +35,7 @@ app.use(session({
 }));
 
 app.use(passport.initialize());
+// authenticated passport user session object is passed to the passport session middleware
 app.use(passport.session());
 // REVIEW: if I include the auth middleware here, do I still need to add it to routes? And, do I need the below, and the above session refs
 app.use(authenticationMiddleware);
