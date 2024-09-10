@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import dotenvx from '@dotenvx/dotenvx';
 import sequelize, { connectToDB } from './config/db';
 import userRoutes from './routes/user';
 
-dotenv.config()
+dotenvx.config();
 const app = express();
 
 // connect to database

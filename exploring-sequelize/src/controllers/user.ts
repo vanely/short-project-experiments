@@ -11,6 +11,7 @@ export class UserController {
         req.body,
         { fields: ['firstName', 'lastName', 'username', 'email', 'password'] }
       )
+      console.log(`Just registered user:\n${JSON.stringify(user, null, 2)}`);
       if (!user) {
         throw new AppError('Unable to create user', 400);
       }
@@ -21,6 +22,7 @@ export class UserController {
       } else {
         res.status(500).json({ message: 'Internal server error' });
       }
+      console.error(`Error:\n${error}`);
     }
   }
 
@@ -40,6 +42,7 @@ export class UserController {
       } else {
         res.status(500).json({ message: 'Internal server error' });
       }
+      console.error(`Error:\n${error}`);
     }
   }
 
@@ -61,6 +64,7 @@ export class UserController {
       } else {
         res.status(500).json({ message: 'Internal server error' });
       }
+      console.error(`Error:\n${error}`);
     }
   }
 
@@ -82,6 +86,7 @@ export class UserController {
       res.json(users);
     } catch (error) {
       res.status(500).json({ message: 'Internal server error' });
+      console.error(`Error:\n${error}`);
     }
   }
 
@@ -100,6 +105,7 @@ export class UserController {
       } else {
         res.status(500).json({ message: 'Internal server error' });
       }
+      console.error(`Error:\n${error}`);
     }
   }
 }
