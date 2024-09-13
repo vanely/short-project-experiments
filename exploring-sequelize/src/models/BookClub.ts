@@ -1,4 +1,13 @@
-import { Model, DataTypes } from 'sequelize';
+import {
+  Model,
+  DataTypes,
+  Association,
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute,
+  ForeignKey,
+} from 'sequelize';
 import sequelize from '../config/db';
 import {
   BannerImageInterface,
@@ -23,28 +32,36 @@ import User from './User';
 // NOTE: [] scheduling for bookclub conversations, that generates .ics calender events
 
 // ADDITIONS TO THIS SHOULD REFLECT "BookClubInterface"
-class BookClub extends Model {
-  public id!: number;
-  public name!: string;
-  public description!: string;
-  public banner!: BannerImageInterface;
-  public coverImage!: CoverImageInterface;
-  public members!: BookClubMembersInterface[];
-  public posts!: BookClubPostInterface[];
-  public createdBy!: number;
-  public currentBookId!: number | null;
-  public active!: boolean;
-  public access!: BookClubAccessEnum;
-  public bookList!: BookInterface[];
-  public createdAt!: Date;
-  public updatedAt!: Date;
+class BookClub extends Model<InferAttributes<BookClub>, InferCreationAttributes<BookClub>> {
+  declare id: CreationOptional<string>;
+  declare ownerId: ForeignKey<User['id']>;
+  declare name: string;
+  declare description: string;
+  declare banner: BannerImageInterface;
+  declare coverImage: CoverImageInterface;
+  // TODO: this will need to be it's own model
+  declare posts: BookClubPostInterface[];
+  declare currentBookId: number | null;
+  declare active: boolean;
+  declare access: BookClubAccessEnum;
+  // TODO: make this book model
+  declare bookList: BookInterface[];
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
+  
+  // associations
+  declare members?: NonAttribute<User[]>;
+
+  declare static associations: {
+    members: Association<BookClub, User>;
+  }
 }
 
 BookClub.init({
   id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
+    type: DataTypes.UUID,
     primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
   },
   name: {
     type: DataTypes.STRING,
@@ -76,16 +93,16 @@ BookClub.init({
       }
     }
   },
-  members: {
+  posts: {
     type: DataTypes.JSONB,
     defaultValue: [],
   },
-  createdBy: {
-    type: DataTypes.INTEGER,
+  ownerId: {
+    type: DataTypes.UUID,
     allowNull: false,
   },
   currentBookId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     allowNull: true,
   },
   active: {
@@ -120,41 +137,17 @@ BookClub.init({
       name: 'idx_bookclub_name',
       fields: ['name'],
     },
-    {
-      name: 'idx_bookclub_members',
-      fields: ['members'],
-    },
-    {
-      name: 'idx_bookclub_posts',
-      fields: ['posts'],
-    },
-    {
-      name: 'idx_bookclub_current_book',
-      fields: ['currentBookId'],
-    },
-    {
-      name: 'idx_bookclub_active',
-      fields: ['active'],
-    },
-    {
-      name: 'idx_bookclub_access',
-      fields: ['access'],
-    },
-    {
-      name: 'idx_bookclub_book_list',
-      fields: ['bookList'],
-    },
   ]
 });
 
 // associations
-BookClub.belongsToMany(User, { through: 'UserBookClub' });
-User.belongsToMany(BookClub, { through: 'UserBookClub' });
+BookClub.hasMany(User, { as: 'members' });
+// User.belongsToMany(BookClub, { through: 'UserBookClub' });
 
 // BookClub.belongsToMany(Book, { through: 'BookClubBook' });
 // Book.belongsToMany(BookClub, { through: 'BookClubBook' });
 
-BookClub.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
+// BookClub.belongsTo(User, { as: 'creator', foreignKey: 'createdBy' });
 // BookClub.belongsTo(Book, { as: 'currentBook', foreignKey: 'currentBookId' });
 
 export default BookClub;

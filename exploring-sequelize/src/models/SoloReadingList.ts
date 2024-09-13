@@ -1,11 +1,9 @@
 import {
   Model,
   DataTypes,
-  Association,
   InferAttributes,
   InferCreationAttributes,
   CreationOptional,
-  NonAttribute,
   ForeignKey,
 } from 'sequelize';
 import sequelize from '../config/db';
@@ -21,36 +19,30 @@ import {
 //       create a tagging system for filtering beyond genre
 // REVIEW: using the models themselves as types result in circular imports, is this ok, since they're just being used as types?
 class SoloReadingList extends Model<InferAttributes<SoloReadingList>, InferCreationAttributes<SoloReadingList>> {
-  declare id: CreationOptional<number>;
-  declare userId: ForeignKey<User['id']>;
+  declare id: CreationOptional<string>;
+  declare ownerId: ForeignKey<User['id']>;
   declare name: string;
   declare description: string;
   declare upVotes: number;
   declare banner: BannerImageInterface;
   declare coverImage: CoverImageInterface;
-  // should probably be book interface
+  // REVIEW: may need to update this when implemented
   declare currentBook: BookInterface;
   declare active: boolean;
   declare access: SoloReadingListEnum;
   declare bookList: BookInterface[];
   declare createdAt: Date;
   declare updatedAt: Date;
-
-  declare user?: NonAttribute<User>;
-
-  declare static associations: {
-    user: Association<SoloReadingList, User>;
-  }
 }
 
 SoloReadingList.init({
   id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
+    type: DataTypes.UUID,
     primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
   },
-  userId: {
-    type: DataTypes.INTEGER,
+  ownerId: {
+    type: DataTypes.UUID,
     allowNull: false,
     unique: true,
   },
@@ -123,34 +115,7 @@ SoloReadingList.init({
       name: 'idx_bookclub_name',
       fields: ['name'],
     },
-    {
-      name: 'idx_bookclub_current_book',
-      fields: ['currentBook'],
-    },
-    {
-      name: 'idx_bookclub_active',
-      fields: ['active'],
-    },
-    {
-      name: 'idx_bookclub_access',
-      fields: ['access'],
-    },
-    {
-      name: 'idx_bookclub_book_list',
-      fields: ['bookList'],
-    },
   ],
 });
-
-// associations
-SoloReadingList.belongsToMany(User, {
-  as: 'readingListBelongsToUsers',
-  through: 'ReadingListInUsers',
-});
-
-// SoloReadingList.hasMany(User, {
-//   as: 'readingListHasUsers',
-//   foreignKey: 'readingListId',
-// });
 
 export default SoloReadingList;

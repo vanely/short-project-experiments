@@ -30,6 +30,8 @@ export interface BannerImageInterface extends CoverImageInterface{}
 
 export interface BookInterface {
   id: number;
+  apiId: number | string;
+  sourceAPI: string; // where it was refereced from
   title: string;
   author: string;
   isbn: string;

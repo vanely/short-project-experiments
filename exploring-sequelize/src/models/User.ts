@@ -15,7 +15,7 @@ import BookClub from './BookClub';
 import SoloReadingList from './SoloReadingList';
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
-  declare id: CreationOptional<number>;
+  declare id: CreationOptional<string>;
   declare email: string;
   declare password: string | null;
   declare passwordSalt: string;
@@ -27,35 +27,39 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare updatedAt: CreationOptional<Date>;
 
   // associations
-  declare friendRequests?: NonAttribute<FriendRequest[]>;
-  declare bookClubs?: NonAttribute<BookClub[]>;
+  declare receivedFriendRequests?: NonAttribute<FriendRequest[]>;
+  declare sentFriendRequests?: NonAttribute<FriendRequest[]>;
+  declare belongsToBookClubs?: NonAttribute<BookClub[]>;
+  declare ownedBookClubs?: NonAttribute<BookClub[]>;
   declare soloReadingLists?: NonAttribute<SoloReadingList[]>;
   declare friends?: NonAttribute<User[]>;
 
   declare static associations: {
-    friendRequests: Association<User, FriendRequest>;
-    bookClubs: Association<User, BookClub>;
+    receivedFriendRequests: Association<User, FriendRequest>;
+    sentFriendRequests: Association<User, FriendRequest>;
+    belongsToBookClubs: Association<User, BookClub>;
+    ownedBookClubs: Association<User, BookClub>;
     soloReadingLists: Association<User, SoloReadingList>;
     friends: Association<User, User>;
   };
 
   async validatePassword(password: string): Promise<boolean> {
-    const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
+    const pepper: string = process.env.PASSWORD_PEPPER as string;
     return this.password ? argon2.verify(this.password, `${password}${this.passwordSalt}${pepper}`) : false;
   }
 
   // get user model without password
   toSafeObject(): Partial<User> {
-    const { id, email, username, firstName, lastName, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt } = this;
-    return { id, email, username, firstName, lastName, googleId, bookClubs, soloReadingLists, friends, createdAt, updatedAt };
+    const { id, email, username, firstName, lastName, googleId, belongsToBookClubs, ownedBookClubs, soloReadingLists, friends, createdAt, updatedAt } = this;
+    return { id, email, username, firstName, lastName, googleId, belongsToBookClubs, ownedBookClubs, soloReadingLists, friends, createdAt, updatedAt };
   }
 }
 
 User.init({
   id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
+    type: DataTypes.UUID,
     primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
   },
   email: {
     type: DataTypes.STRING,
@@ -105,7 +109,7 @@ User.init({
     beforeCreate: async (user: User) => {
       if (user.password) {
         user.passwordSalt = await crypto.randomBytes(16).toString('hex');
-        const pepper: string = process.env.PASSWORD_PEPPER || 'unh-senha-aleatoria-pepper';
+        const pepper: string = process.env.PASSWORD_PEPPER as string;
         user.password = await argon2.hash(`${user.password}${user.passwordSalt}${pepper}`, {
           type: argon2.argon2id,
           memoryCost: 2 ** 16,
@@ -122,63 +126,39 @@ User.init({
       unique: true,
     },
     {
-      name: 'idx_user_firstname',
-      fields: ['firstName'],
-    },
-    {
-      name: 'idx_user_lastname',
-      fields: ['lastName'],
-    },
-    {
-      name: 'idx_user_created_at',
-      fields: ['createdAt'],
-    },
-    {
-      name: 'idx_user_book_clubs',
-      fields: ['bookClubs'],
-    },
-    {
-      name: 'idx_user_solo_reading_lists',
-      fields: ['soloReadingLists'],
+      name: 'idx_user_username',
+      fields: ['username'],
     },
   ],
 });
 
 // associations
 User.hasMany(FriendRequest, {
-  as: 'userHasReceivedFriendRequests',
-  foreignKey: 'toId',
+  as: 'receivedFriendRequests',
+  foreignKey: 'fromId',
 });
 
 User.hasMany(FriendRequest, {
-  as: 'userHasSentFriendRequests',
-  foreignKey: 'fromId',
+  as: 'sentFriendRequests',
+  foreignKey: 'toId',
 })
 
 User.belongsToMany(BookClub, {
-  as: 'userBelongsToBookClubs',
-  through: 'UserBookClubs',
+  as: 'belongsToBookClubs',
+  through: 'UserInBookClubs',
 });
 
-// REVIEW: add has many bookClubs
 User.hasMany(BookClub, {
-  as: 'userHasBookClubs',
-  foreignKey: 'userId',
-})
-
-User.belongsToMany(SoloReadingList, {
-  as: 'userBelongsToReadingLists',
-  through: 'UserReadingLists',
+  as: 'ownedBookClubs',
+  foreignKey: 'ownerId',
 })
 
 User.hasMany(SoloReadingList, {
-  as: 'userHasSoloReadingLists',
-  foreignKey: 'userId',
+  as: 'soloReadingLists',
 });
 
-User.belongsToMany(User, {
+User.hasMany(User, {
   as: 'friends',
-  through: 'UserFriends',
 });
 
 export default User;

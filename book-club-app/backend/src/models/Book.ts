@@ -2,6 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/db';
 import { CoverImageInterface } from './types';
 
+// update base on changes to interface
 class Book extends Model {
   public id!: number;
   public title!: string;
