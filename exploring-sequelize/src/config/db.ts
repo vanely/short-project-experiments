@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 
-const sequelize = new Sequelize(process.env.DATABASE_URL as string, {
+const sequelize = new Sequelize(process.env.LOCAL_DATABASE_URL as string, {
   dialect: 'postgres',
   logging: false // toggle based on env (...msg) => console.log(msg),
 });
