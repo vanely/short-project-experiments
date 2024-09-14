@@ -58,14 +58,15 @@ FriendRequest.init({
   timestamps: true,
 });
 
-FriendRequest.belongsTo(User, { 
-  as: 'from', 
-  foreignKey: 'fromId',
-});
+// associations
+// FriendRequest.belongsTo(User, { 
+//   as: 'from', 
+//   foreignKey: 'fromId',
+// });
 
-FriendRequest.belongsTo(User, { 
-  as: 'to', 
-  foreignKey: 'toId',
-});
+// FriendRequest.belongsTo(User, { 
+//   as: 'to', 
+//   foreignKey: 'toId',
+// });
 
 export default FriendRequest;

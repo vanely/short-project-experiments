@@ -141,7 +141,7 @@ BookClub.init({
 });
 
 // associations
-BookClub.hasMany(User, { as: 'members' });
+// BookClub.hasMany(User, { as: 'members' });
 // User.belongsToMany(BookClub, { through: 'UserBookClub' });
 
 // BookClub.belongsToMany(Book, { through: 'BookClubBook' });

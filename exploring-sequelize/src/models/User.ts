@@ -133,32 +133,32 @@ User.init({
 });
 
 // associations
-User.hasMany(FriendRequest, {
-  as: 'receivedFriendRequests',
-  foreignKey: 'fromId',
-});
+// User.hasMany(FriendRequest, {
+//   as: 'receivedFriendRequests',
+//   foreignKey: 'fromId',
+// });
 
-User.hasMany(FriendRequest, {
-  as: 'sentFriendRequests',
-  foreignKey: 'toId',
-})
+// User.hasMany(FriendRequest, {
+//   as: 'sentFriendRequests',
+//   foreignKey: 'toId',
+// })
 
-User.belongsToMany(BookClub, {
-  as: 'belongsToBookClubs',
-  through: 'UserInBookClubs',
-});
+// User.belongsToMany(BookClub, {
+//   as: 'belongsToBookClubs',
+//   through: 'UserInBookClubs',
+// });
 
-User.hasMany(BookClub, {
-  as: 'ownedBookClubs',
-  foreignKey: 'ownerId',
-})
+// User.hasMany(BookClub, {
+//   as: 'ownedBookClubs',
+//   foreignKey: 'ownerId',
+// })
 
-User.hasMany(SoloReadingList, {
-  as: 'soloReadingLists',
-});
+// User.hasMany(SoloReadingList, {
+//   as: 'soloReadingLists',
+// });
 
-User.hasMany(User, {
-  as: 'friends',
-});
+// User.hasMany(User, {
+//   as: 'friends',
+// });
 
 export default User;
