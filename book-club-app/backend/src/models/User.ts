@@ -18,7 +18,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<number>;
   declare email: string;
   declare password: string | null;
-  declare passwordSalt: string;
+  declare passwordSalt: string | null;
   declare username: string;
   declare firstName: string;
   declare lastName: string;
@@ -68,7 +68,7 @@ User.init({
   },
   passwordSalt: {
     type: DataTypes.STRING(32),
-    allowNull: false,
+    allowNull: true,
   },
   username: {
     type: DataTypes.STRING,
