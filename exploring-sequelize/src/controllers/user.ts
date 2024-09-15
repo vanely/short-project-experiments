@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import { Request, Response } from 'express';
-import User from '../models/User';
+import { User } from '../models/index';
 import { AppError } from '../utils/appError';
 
 export class UserController {
