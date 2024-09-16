@@ -112,7 +112,7 @@ SoloReadingList.init({
   timestamps: true,
   indexes: [
     {
-      name: 'idx_bookclub_name',
+      name: 'idx_reading_list_name',
       fields: ['name'],
     },
   ],
