@@ -8,9 +8,9 @@ import {
   NonAttribute,
   ForeignKey,
 } from 'sequelize';
-import sequelize from '../config/db';
-import User from './User';
-import { FriendRequestStatusEnum } from './types';
+import sequelize from '../../config/db';
+import User from '../user/User';
+import { FriendRequestStatusEnum } from '../types';
 
 // NOTE: allow these to be deleted in by sender, 
 class FriendRequest extends Model<InferAttributes<FriendRequest>, InferCreationAttributes<FriendRequest>> {

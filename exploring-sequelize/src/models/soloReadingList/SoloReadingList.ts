@@ -6,18 +6,19 @@ import {
   CreationOptional,
   ForeignKey,
 } from 'sequelize';
-import sequelize from '../config/db';
-import User from './User';
+import sequelize from '../../config/db';
+import User from '../user/User';
 import {
   BannerImageInterface,
   BookInterface,
   CoverImageInterface,
   SoloReadingListEnum
-} from './types';
+} from '../types';
 
 // NOTE: should keep track of users who subscribe to a public reading list
 //       create a tagging system for filtering beyond genre
 // REVIEW: using the models themselves as types result in circular imports, is this ok, since they're just being used as types?
+// REVIEW: we'll want to update the 'currentBook' for different users(multiple states same object? Or duplicates(this should be it, since it has nothing to do with the creator))
 class SoloReadingList extends Model<InferAttributes<SoloReadingList>, InferCreationAttributes<SoloReadingList>> {
   declare id: CreationOptional<string>;
   declare ownerId: ForeignKey<User['id']>;
@@ -33,6 +34,10 @@ class SoloReadingList extends Model<InferAttributes<SoloReadingList>, InferCreat
   declare bookList: BookInterface[];
   declare createdAt: Date;
   declare updatedAt: Date;
+
+  toSafeObject() {
+
+  }
 }
 
 SoloReadingList.init({

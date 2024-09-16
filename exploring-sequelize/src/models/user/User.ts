@@ -9,10 +9,10 @@ import {
 } from 'sequelize';
 import argon2 from 'argon2';
 import crypto from 'crypto';
-import sequelize from '../config/db';
-import FriendRequest from './FriendRequest';
-import BookClub from './BookClub';
-import SoloReadingList from './SoloReadingList';
+import sequelize from '../../config/db';
+import FriendRequest from '../friendRequest/FriendRequest';
+import BookClub from '../bookClub/BookClub';
+import SoloReadingList from '../soloReadingList/SoloReadingList';
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<string>;

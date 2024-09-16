@@ -8,7 +8,7 @@ import {
   NonAttribute,
   ForeignKey,
 } from 'sequelize';
-import sequelize from '../config/db';
+import sequelize from '../../config/db';
 import {
   BannerImageInterface,
   BookClubAccessEnum,
@@ -16,8 +16,8 @@ import {
   BookClubPostInterface,
   BookInterface,
   CoverImageInterface
-} from './types'
-import User from './User';
+} from '../types'
+import User from '../user/User';
 // import Book from './Book';
 
 // NOTE: [x] add active and inactive fields for bookclubs

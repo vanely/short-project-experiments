@@ -8,7 +8,7 @@ import {
   NonAttribute
 } from 'sequelize';
 import crypto from 'crypto';
-import sequelize from '../config/db';
+import sequelize from '../../config/db';
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<number>;

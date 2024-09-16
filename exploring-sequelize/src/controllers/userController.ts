@@ -26,6 +26,14 @@ export class UserController {
     }
   }
 
+  static async login(req: Request, res: Response) {
+
+  }
+
+  static async removeFriend(req: Request, res: Response) {
+
+  }
+
   static async getProfile(req: Request, res: Response) {
     try {
       const { userId } = req.body;

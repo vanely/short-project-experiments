@@ -1,8 +1,8 @@
 import sequelize from '../config/db';
-import User from './User';
-import FriendRequest from './FriendRequest';
-import BookClub from './BookClub';
-import SoloReadingList from './SoloReadingList';
+import User from './user/User';
+import FriendRequest from './friendRequest/FriendRequest';
+import BookClub from './bookClub/BookClub';
+import SoloReadingList from './soloReadingList/SoloReadingList';
 import { setupAssociations } from './associations';
 import { fail } from 'assert';
 

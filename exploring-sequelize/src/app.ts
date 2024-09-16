@@ -4,8 +4,10 @@ import dotenvx from '@dotenvx/dotenvx';
 import sequelize, { connectToDB } from './config/db';
 import { setupAssociations } from './models/associations';
 import models from './models/index';
-import userRoutes from './routes/user';
+import bookClubRoutes from './routes/bookClub';
 import friendRequestRoutes from './routes/friendRequest';
+import soloReadingListRoutes from './routes/soloReadingList';
+import userRoutes from './routes/user';
 
 dotenvx.config();
 const app = express();
@@ -42,7 +44,9 @@ app.use(express.json());
 app.use(cors());
 
 // routes
+app.use('/book-club', bookClubRoutes);
+app.use('/friend-request', friendRequestRoutes);
+app.use('/solo-reading-list', soloReadingListRoutes);
 app.use('/user', userRoutes);
-app.use('/friendRequest', friendRequestRoutes);
 
 export default app;
