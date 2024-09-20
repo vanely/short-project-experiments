@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Transaction, Op } from 'sequelize';
-import { BookClub, User, Book } from '../models'; // Assuming you have these models
+import { BookClub, User, Book } from '../models/index'; // Assuming you have these models
 import sequelize from '../config/db';
 import { BookClubAccessEnum, BannerImageInterface, CoverImageInterface, BookInterface, BookClubPostInterface } from '../models/types';
 

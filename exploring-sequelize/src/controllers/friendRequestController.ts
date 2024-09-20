@@ -25,6 +25,7 @@ class FriendRequestController {
 				return;
 			}
 
+			// this logic can be done in the UI, via sent requests. On the current user, check the sent invites against the ids of users being viewed for graying out request button.
 			const existingRequest = await FriendRequest.findOne({
 				where: {
 					fromId,

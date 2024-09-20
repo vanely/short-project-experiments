@@ -1,10 +1,12 @@
-import { Op } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 import { Request, Response } from 'express';
 import { User } from '../models/index';
 import { AppError } from '../utils/appError';
+import sequelize from '../config/db';
 
 export class UserController {
   static async register(req: Request, res:Response) {
+    
     try {
       // validation should be done to make sure required fields are present
       const user = await User.create(
