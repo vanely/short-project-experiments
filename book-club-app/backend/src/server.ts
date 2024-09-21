@@ -1,6 +1,6 @@
 import app from './app';
 
-const PORT = process.env.PORT || 3333;
+const PORT: string = process.env.PORT as string;
 
 // start the server
 const server = app.listen(PORT, () => {
