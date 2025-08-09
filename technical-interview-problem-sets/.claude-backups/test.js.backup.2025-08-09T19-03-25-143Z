@@ -1,0 +1,221 @@
+const { calculateDiscount } = require('./discount');
+
+// Helper function to check if discount amounts match expected values
+function checkDiscountAmounts(actual, expected, tolerance = 0.01) {
+  if (Math.abs(actual - expected) > tolerance) {
+    return false;
+  }
+  return true;
+}
+
+// Test Case 1: Example from the README
+function testExample() {
+  const order = {
+    items: [
+      { productId: "p1", category: "electronics", price: 100, quantity: 2 },
+      { productId: "p2", category: "clothing", price: 50, quantity: 1 }
+    ],
+    totalAmount: 250,
+    date: "2023-06-15"
+  };
+
+  const customer = {
+    id: "c123",
+    loyaltyTier: "gold",
+    registrationDate: "2022-01-10",
+    purchaseHistory: [
+      { orderDate: "2023-05-20", totalAmount: 150 },
+      { orderDate: "2023-04-10", totalAmount: 200 }
+    ]
+  };
+
+  const discountRules = [
+    {
+      id: "summer_sale",
+      type: "percentage",
+      value: 10,
+      conditions: [
+        { type: "date_range", operator: "between", value: ["2023-06-01", "2023-08-31"] }
+      ],
+      priority: 1,
+      stackable: true
+    },
+    {
+      id: "loyalty_discount",
+      type: "percentage",
+      value: 5,
+      conditions: [
+        { type: "loyalty_tier", operator: "in", value: ["gold", "platinum"] }
+      ],
+      priority: 2,
+      stackable: true
+    },
+    {
+      id: "buy_one_get_one_half_off",
+      type: "buy_x_get_y",
+      value: { buy: 1, get: 1, discount: 50 },
+      conditions: [
+        { type: "product_category", operator: "equals", value: "electronics" }
+      ],
+      priority: 3,
+      stackable: false
+    }
+  ];
+
+  const result = calculateDiscount(order, customer, discountRules);
+  
+  // Check that the orderTotal matches
+  console.assert(result.orderTotal === 250, 
+    `Expected orderTotal to be 250, got ${result.orderTotal}`);
+  
+  // Check that the discountAmount is correct (75)
+  console.assert(checkDiscountAmounts(result.discountAmount, 75), 
+    `Expected discountAmount to be 75, got ${result.discountAmount}`);
+  
+  // Check that the finalAmount is correct (175)
+  console.assert(checkDiscountAmounts(result.finalAmount, 175), 
+    `Expected finalAmount to be 175, got ${result.finalAmount}`);
+  
+  // Check that the applied discounts are correct
+  console.assert(result.appliedDiscounts.length === 3, 
+    `Expected 3 applied discounts, got ${result.appliedDiscounts.length}`);
+  
+  // Check that the buy_one_get_one_half_off discount is applied
+  const buyOneGetOneDiscount = result.appliedDiscounts.find(d => d.ruleId === "buy_one_get_one_half_off");
+  console.assert(buyOneGetOneDiscount && checkDiscountAmounts(buyOneGetOneDiscount.discountAmount, 50), 
+    `Expected buy_one_get_one_half_off discount to be 50, got ${buyOneGetOneDiscount ? buyOneGetOneDiscount.discountAmount : 'undefined'}`);
+  
+  // Check that the summer_sale discount is applied
+  const summerSaleDiscount = result.appliedDiscounts.find(d => d.ruleId === "summer_sale");
+  console.assert(summerSaleDiscount && checkDiscountAmounts(summerSaleDiscount.discountAmount, 20), 
+    `Expected summer_sale discount to be 20, got ${summerSaleDiscount ? summerSaleDiscount.discountAmount : 'undefined'}`);
+  
+  // Check that the loyalty_discount is applied
+  const loyaltyDiscount = result.appliedDiscounts.find(d => d.ruleId === "loyalty_discount");
+  console.assert(loyaltyDiscount && checkDiscountAmounts(loyaltyDiscount.discountAmount, 5), 
+    `Expected loyalty_discount discount to be 5, got ${loyaltyDiscount ? loyaltyDiscount.discountAmount : 'undefined'}`);
+}
+
+// Test Case 2: Percentage discount with order total condition
+function testPercentageDiscount() {
+  const order = {
+    items: [
+      { productId: "p1", category: "books", price: 20, quantity: 3 },
+      { productId: "p2", category: "books", price: 15, quantity: 2 }
+    ],
+    totalAmount: 90,
+    date: "2023-07-15"
+  };
+
+  const customer = {
+    id: "c456",
+    loyaltyTier: "bronze",
+    registrationDate: "2023-05-01",
+    purchaseHistory: []
+  };
+
+  const discountRules = [
+    {
+      id: "bulk_purchase",
+      type: "percentage",
+      value: 15,
+      conditions: [
+        { type: "order_total", operator: "gte", value: 75 }
+      ],
+      priority: 1,
+      stackable: true
+    }
+  ];
+
+  const result = calculateDiscount(order, customer, discountRules);
+  
+  // Check that the discount is correctly applied (15% of 90 = 13.5)
+  console.assert(checkDiscountAmounts(result.discountAmount, 13.5), 
+    `Expected discountAmount to be 13.5, got ${result.discountAmount}`);
+  
+  console.assert(checkDiscountAmounts(result.finalAmount, 76.5), 
+    `Expected finalAmount to be 76.5, got ${result.finalAmount}`);
+  
+  console.assert(result.appliedDiscounts.length === 1, 
+    `Expected 1 applied discount, got ${result.appliedDiscounts.length}`);
+}
+
+// Test Case 3: Fixed amount discount with loyalty tier and registration date conditions
+function testFixedAmountDiscount() {
+  const order = {
+    items: [
+      { productId: "p1", category: "clothing", price: 40, quantity: 1 }
+    ],
+    totalAmount: 40,
+    date: "2023-06-20"
+  };
+
+  const customer = {
+    id: "c789",
+    loyaltyTier: "silver",
+    registrationDate: "2023-05-25", // Registered within last 30 days
+    purchaseHistory: []
+  };
+
+  const discountRules = [
+    {
+      id: "new_customer",
+      type: "fixed_amount",
+      value: 10,
+      conditions: [
+        { type: "registration_date", operator: "within_last", value: "30d" }
+      ],
+      priority: 1,
+      stackable: false
+    },
+    {
+      id: "silver_discount",
+      type: "percentage",
+      value: 5,
+      conditions: [
+        { type: "loyalty_tier", operator: "equals", value: "silver" }
+      ],
+      priority: 2,
+      stackable: true
+    }
+  ];
+
+  const result = calculateDiscount(order, customer, discountRules);
+  
+  // The new_customer discount is non-stackable, so only it should be applied
+  console.assert(checkDiscountAmounts(result.discountAmount, 10), 
+    `Expected discountAmount to be 10, got ${result.discountAmount}`);
+  
+  console.assert(checkDiscountAmounts(result.finalAmount, 30), 
+    `Expected finalAmount to be 30, got ${result.finalAmount}`);
+  
+  console.assert(result.appliedDiscounts.length === 1, 
+    `Expected 1 applied discount, got ${result.appliedDiscounts.length}`);
+  
+  console.assert(result.appliedDiscounts[0].ruleId === "new_customer", 
+    `Expected applied discount to be new_customer, got ${result.appliedDiscounts[0].ruleId}`);
+}
+
+// Test Case 4: Buy X Get Y discount
+function testBuyXGetYDiscount() {
+  const order = {
+    items: [
+      { productId: "p1", category: "books", price: 20, quantity: 3 }
+    ],
+    totalAmount: 60,
+    date: "2023-07-01"
+  };
+
+  const customer = {
+    id: "c101",
+    loyaltyTier: "bronze",
+    registrationDate: "2022-01-01",
+    purchaseHistory: []
+  };
+
+  const discountRules = [
+    {
+      id: "buy_2_get_1_free",
+      type: "buy_x_get_y",
+      value: { buy: 2, get: 1, discount: 100 },
+      conditions: [

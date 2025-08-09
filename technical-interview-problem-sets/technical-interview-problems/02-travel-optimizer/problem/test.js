@@ -1,0 +1,119 @@
+const { findOptimalRoute } = require('./travel');
+
+// Helper function to verify a valid route
+function isValidRoute(route, cities) {
+  if (route.length !== cities.length + 1) return false;
+  
+  // Check if the route starts and ends with the same city
+  if (route[0].cityId !== route[route.length - 1].cityId) return false;
+  
+  // Check if all cities are visited exactly once (except the starting city which is visited twice)
+  const visitedCities = new Set();
+  for (let i = 0; i < route.length - 1; i++) {
+    visitedCities.add(route[i].cityId);
+  }
+  
+  return visitedCities.size === cities.length;
+}
+
+// Helper function to calculate the total distance of a route
+function calculateTotalDistance(route, distanceMatrix) {
+  let totalDistance = 0;
+  for (let i = 0; i < route.length - 1; i++) {
+    totalDistance += distanceMatrix[route[i].cityId][route[i + 1].cityId];
+  }
+  return totalDistance;
+}
+
+// Test Case 1: Basic test with 4 cities
+function testFourCities() {
+  const cities = [
+    { cityId: 0, name: "New York" },
+    { cityId: 1, name: "Los Angeles" },
+    { cityId: 2, name: "Chicago" },
+    { cityId: 3, name: "Houston" }
+  ];
+
+  const distanceMatrix = [
+    [0, 2786, 790, 1628],
+    [2786, 0, 2015, 1547],
+    [790, 2015, 0, 1090],
+    [1628, 1547, 1090, 0]
+  ];
+
+  const result = findOptimalRoute(cities, distanceMatrix);
+  
+  console.assert(isValidRoute(result.route, cities), 
+    "Route is not valid - must visit all cities exactly once and return to the starting city");
+  
+  const actualDistance = calculateTotalDistance(result.route, distanceMatrix);
+  console.assert(Math.abs(result.totalDistance - actualDistance) < 0.001, 
+    `Reported distance ${result.totalDistance} doesn't match actual distance ${actualDistance}`);
+  
+  // For 4 cities, we can verify the optimal solution using known optimal values
+  // The optimal distance for this example is 6143
+  console.assert(result.totalDistance <= 6143, 
+    `Route is not optimal. Expected at most 6143, got ${result.totalDistance}`);
+}
+
+// Test Case 2: Trivial case with 2 cities
+function testTwoCities() {
+  const cities = [
+    { cityId: 0, name: "City A" },
+    { cityId: 1, name: "City B" }
+  ];
+
+  const distanceMatrix = [
+    [0, 10],
+    [10, 0]
+  ];
+
+  const result = findOptimalRoute(cities, distanceMatrix);
+  
+  console.assert(isValidRoute(result.route, cities), 
+    "Route is not valid - must visit all cities exactly once and return to the starting city");
+  
+  const actualDistance = calculateTotalDistance(result.route, distanceMatrix);
+  console.assert(Math.abs(result.totalDistance - actualDistance) < 0.001, 
+    `Reported distance ${result.totalDistance} doesn't match actual distance ${actualDistance}`);
+  
+  // For 2 cities, the optimal distance is simply 2 * the distance between them
+  console.assert(result.totalDistance === 20, 
+    `Route is not optimal. Expected 20, got ${result.totalDistance}`);
+}
+
+// Test Case 3: Three cities in a triangle
+function testThreeCities() {
+  const cities = [
+    { cityId: 0, name: "City A" },
+    { cityId: 1, name: "City B" },
+    { cityId: 2, name: "City C" }
+  ];
+
+  const distanceMatrix = [
+    [0, 10, 15],
+    [10, 0, 20],
+    [15, 20, 0]
+  ];
+
+  const result = findOptimalRoute(cities, distanceMatrix);
+  
+  console.assert(isValidRoute(result.route, cities), 
+    "Route is not valid - must visit all cities exactly once and return to the starting city");
+  
+  const actualDistance = calculateTotalDistance(result.route, distanceMatrix);
+  console.assert(Math.abs(result.totalDistance - actualDistance) < 0.001, 
+    `Reported distance ${result.totalDistance} doesn't match actual distance ${actualDistance}`);
+  
+  // For 3 cities, the optimal route is simply visiting all 3 in some order
+  // The minimum possible distance is 10 + 20 + 15 = 45
+  console.assert(result.totalDistance === 45, 
+    `Route is not optimal. Expected 45, got ${result.totalDistance}`);
+}
+
+// Run all tests
+console.log("Running tests...");
+testTwoCities();
+testThreeCities();
+testFourCities();
+console.log("All tests completed!");

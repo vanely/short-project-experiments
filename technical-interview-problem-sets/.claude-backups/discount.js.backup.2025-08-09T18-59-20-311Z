@@ -1,0 +1,282 @@
+/**
+ * Calculate the total discount amount for a given order based on a set of discount rules.
+ * 
+ * @param {Object} order - The current order with items, totalAmount, and date
+ * @param {Object} customer - The customer with loyaltyTier, registrationDate, and purchaseHistory
+ * @param {Array} discountRules - Array of discount rule objects
+ * @return {Object} An object with orderTotal, discountAmount, finalAmount, and appliedDiscounts
+ */
+function calculateDiscount(order, customer, discountRules) {
+  // Find applicable discount rules
+  const applicableRules = findApplicableRules(order, customer, discountRules);
+  
+  // Sort rules by priority (higher priority first)
+  applicableRules.sort((a, b) => b.priority - a.priority);
+  
+  // Apply discounts
+  const result = applyDiscounts(order, customer, applicableRules);
+  
+  return result;
+}
+
+/**
+ * Find discount rules that apply to the given order and customer.
+ */
+function findApplicableRules(order, customer, discountRules) {
+  return discountRules.filter(rule => {
+    // Check all conditions
+    return rule.conditions.every(condition => {
+      return evaluateCondition(condition, order, customer);
+    });
+  });
+}
+
+/**
+ * Evaluate a single condition.
+ */
+function evaluateCondition(condition, order, customer) {
+  switch (condition.type) {
+    case "order_total":
+      return evaluateOrderTotalCondition(condition, order);
+    case "loyalty_tier":
+      return evaluateLoyaltyTierCondition(condition, customer);
+    case "product_category":
+      return evaluateProductCategoryCondition(condition, order);
+    case "date_range":
+      return evaluateDateRangeCondition(condition, order);
+    case "purchase_history":
+      return evaluatePurchaseHistoryCondition(condition, customer);
+    case "registration_date":
+      return evaluateRegistrationDateCondition(condition, customer);
+    default:
+      throw new Error(`Unknown condition type: ${condition.type}`);
+  }
+}
+
+/**
+ * Evaluate an order_total condition.
+ */
+function evaluateOrderTotalCondition(condition, order) {
+  const { operator, value } = condition;
+  const orderTotal = order.totalAmount;
+  
+  switch (operator) {
+    case "eq":
+      return orderTotal === value;
+    case "neq":
+      return orderTotal !== value;
+    case "gt":
+      return orderTotal > value;
+    case "gte":
+      return orderTotal >= value;
+    case "lt":
+      return orderTotal < value;
+    case "lte":
+      return orderTotal <= value;
+    default:
+      throw new Error(`Unknown operator: ${operator}`);
+  }
+}
+
+/**
+ * Evaluate a loyalty_tier condition.
+ */
+function evaluateLoyaltyTierCondition(condition, customer) {
+  const { operator, value } = condition;
+  const loyaltyTier = customer.loyaltyTier;
+  
+  switch (operator) {
+    case "equals":
+      return loyaltyTier === value;
+    case "not_equals":
+      return loyaltyTier !== value;
+    case "in":
+      return Array.isArray(value) && value.includes(loyaltyTier);
+    default:
+      throw new Error(`Unknown operator: ${operator}`);
+  }
+}
+
+/**
+ * Evaluate a product_category condition.
+ */
+function evaluateProductCategoryCondition(condition, order) {
+  const { operator, value } = condition;
+  const categories = order.items.map(item => item.category);
+  
+  switch (operator) {
+    case "equals":
+      return categories.includes(value);
+    case "not_equals":
+      return !categories.includes(value);
+    case "in":
+      return Array.isArray(value) && value.some(cat => categories.includes(cat));
+    default:
+      throw new Error(`Unknown operator: ${operator}`);
+  }
+}
+
+/**
+ * Evaluate a date_range condition.
+ */
+function evaluateDateRangeCondition(condition, order) {
+  const { operator, value } = condition;
+  const orderDate = new Date(order.date);
+  
+  switch (operator) {
+    case "between":
+      const startDate = new Date(value[0]);
+      const endDate = new Date(value[1]);
+      return orderDate >= startDate && orderDate <= endDate;
+    case "not_between":
+      const notStartDate = new Date(value[0]);
+      const notEndDate = new Date(value[1]);
+      return orderDate < notStartDate || orderDate > notEndDate;
+    default:
+      throw new Error(`Unknown operator: ${operator}`);
+  }
+}
+
+/**
+ * Evaluate a purchase_history condition.
+ */
+function evaluatePurchaseHistoryCondition(condition, customer) {
+  const { operator, value } = condition;
+  const purchaseHistory = customer.purchaseHistory || [];
+  
+  switch (operator) {
+    case "total_orders_eq":
+      return purchaseHistory.length === value;
+    case "total_orders_gt":
+      return purchaseHistory.length > value;
+    case "total_orders_gte":
+      return purchaseHistory.length >= value;
+    case "total_orders_lt":
+      return purchaseHistory.length < value;
+    case "total_orders_lte":
+      return purchaseHistory.length <= value;
+    case "total_spent_gt":
+      const totalSpent = purchaseHistory.reduce((sum, order) => sum + order.totalAmount, 0);
+      return totalSpent > value;
+    default:
+      throw new Error(`Unknown operator: ${operator}`);
+  }
+}
+
+/**
+ * Evaluate a registration_date condition.
+ */
+function evaluateRegistrationDateCondition(condition, customer) {
+  const { operator, value } = condition;
+  const registrationDate = new Date(customer.registrationDate);
+  const now = new Date();
+  
+  switch (operator) {
+    case "within_last":
+      const days = parseInt(value.replace('d', ''));
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const daysDiff = Math.floor((now - registrationDate) / msPerDay);
+      return daysDiff <= days;
+    default:
+      throw new Error(`Unknown operator: ${operator}`);
+  }
+}
+
+/**
+ * Apply discount rules to the order.
+ */
+function applyDiscounts(order, customer, applicableRules) {
+  let currentAmount = order.totalAmount;
+  let appliedDiscounts = [];
+  let nonStackableApplied = false;
+  
+  for (const rule of applicableRules) {
+    // Skip if a non-stackable discount has already been applied
+    if (nonStackableApplied && rule.stackable) {
+      continue;
+    }
+    
+    // Apply the discount
+    let discountAmount = 0;
+    
+    switch (rule.type) {
+      case "percentage":
+        discountAmount = calculatePercentageDiscount(currentAmount, rule.value);
+        break;
+      case "fixed_amount":
+        discountAmount = Math.min(currentAmount, rule.value);
+        break;
+      case "buy_x_get_y":
+        discountAmount = calculateBuyXGetYDiscount(order, rule);
+        break;
+      default:
+        throw new Error(`Unknown rule type: ${rule.type}`);
+    }
+    
+    // Update current amount and applied discounts
+    currentAmount -= discountAmount;
+    appliedDiscounts.push({
+      ruleId: rule.id,
+      discountAmount
+    });
+    
+    // Mark as non-stackable if applicable
+    if (!rule.stackable) {
+      nonStackableApplied = true;
+    }
+  }
+  
+  return {
+    orderTotal: order.totalAmount,
+    discountAmount: order.totalAmount - currentAmount,
+    finalAmount: currentAmount,
+    appliedDiscounts
+  };
+}
+
+/**
+ * Calculate a percentage discount.
+ */
+function calculatePercentageDiscount(amount, percentage) {
+  return (percentage / 100) * amount;
+}
+
+/**
+ * Calculate a buy X get Y discount.
+ */
+function calculateBuyXGetYDiscount(order, rule) {
+  const { buy, get, discount } = rule.value;
+  
+  // Group items by category
+  const itemsByCategory = {};
+  for (const item of order.items) {
+    if (!itemsByCategory[item.category]) {
+      itemsByCategory[item.category] = [];
+    }
+    
+    // Expand items by quantity
+    for (let i = 0; i < item.quantity; i++) {
+      itemsByCategory[item.category].push({
+        productId: item.productId,
+        price: item.price
+      });
+    }
+  }
+  
+  let totalDiscount = 0;
+  
+  // Find matching categories
+  for (const condition of rule.conditions) {
+    if (condition.type === "product_category") {
+      const category = condition.value;
+      const items = itemsByCategory[category] || [];
+      
+      // Sort items by price (to apply discount to cheapest items)
+      items.sort((a, b) => a.price - b.price);
+      
+      // Calculate how many sets of "buy X get Y" we can apply
+      const numSets = Math.floor(items.length / (buy + get));
+      
+      // Apply discount to the Y cheapest items in each set
+      for (let i = 0; i < numSets; i++) {
+        for (let j =

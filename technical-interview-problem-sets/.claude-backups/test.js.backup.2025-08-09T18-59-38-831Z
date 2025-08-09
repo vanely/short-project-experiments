@@ -1,0 +1,72 @@
+const { scheduleEvents } = require('./scheduler');
+
+// Helper function to check if two time strings are equal
+function timeEquals(time1, time2) {
+  return new Date(time1).getTime() === new Date(time2).getTime();
+}
+
+// Helper function to validate resource constraints
+function validateResourceConstraints(event, timeSlot, resources) {
+  // Check if the time slot has enough duration
+  const slotDuration = (new Date(timeSlot.endTime) - new Date(timeSlot.startTime)) / (1000 * 60); // in minutes
+  if (slotDuration < event.duration) {
+    return false;
+  }
+  
+  // Check if all required resources are available
+  for (const resourceType in event.resourceRequirements) {
+    const required = event.resourceRequirements[resourceType] || 0;
+    const inUse = timeSlot.resourcesInUse[resourceType] || 0;
+    const available = resources[resourceType] || 0;
+    
+    if (inUse + required > available) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+// Helper function to validate a schedule
+function validateSchedule(result, events, resources, timeSlots) {
+  const { scheduledEvents, unscheduledEvents } = result;
+  
+  // Check that all events are accounted for
+  const allEventIds = new Set(events.map(e => e.id));
+  const scheduledIds = new Set(scheduledEvents.map(e => e.eventId));
+  const unscheduledIds = new Set(unscheduledEvents);
+  
+  for (const id of allEventIds) {
+    if (!scheduledIds.has(id) && !unscheduledIds.has(id)) {
+      return false;
+    }
+  }
+  
+  // Check that no event is both scheduled and unscheduled
+  for (const id of scheduledIds) {
+    if (unscheduledIds.has(id)) {
+      return false;
+    }
+  }
+  
+  // Create a copy of timeSlots to track resource usage
+  const timeSlotsCopy = JSON.parse(JSON.stringify(timeSlots));
+  const timeSlotMap = new Map(timeSlotsCopy.map(ts => [ts.id, ts]));
+  
+  // Check each scheduled event
+  for (const scheduledEvent of scheduledEvents) {
+    const event = events.find(e => e.id === scheduledEvent.eventId);
+    const timeSlot = timeSlotMap.get(scheduledEvent.timeSlotId);
+    
+    if (!event || !timeSlot) {
+      return false;
+    }
+    
+    // Validate time constraints
+    if (!timeEquals(scheduledEvent.startTime, timeSlot.startTime)) {
+      return false;
+    }
+    
+    const expectedEndTime = new Date(new Date(scheduledEvent.startTime).getTime() + event.duration * 60000).toISOString();
+    if (!timeEquals(scheduledEvent.endTime, expectedEndTime)) {
+      

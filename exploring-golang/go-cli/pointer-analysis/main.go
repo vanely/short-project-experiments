@@ -17,6 +17,19 @@ func pointerTestTwo() *string {
 	return &s
 }
 
+// --------------------------------------------------------------------------
+// everything in Go is passed by value, without reference to original object.
+
+type User struct {
+	Name string
+	Pets []string
+}
+
+func (u User) newPet() {
+	u.Pets = append(u.Pets, "Lucy")
+	fmt.Println(u)
+}
+
 func main() {
 	fmt.Println(noPointer())      // prints string
 	fmt.Println(pointerTest())    // prints <nil>
@@ -25,17 +38,6 @@ func main() {
 	str := pointerTestTwo() // str will store will return the memory location from function
 	actualStr := *str       // pointer to str will return value at memory location
 	fmt.Printf("\npointer to string: %v\nactual string: %v\n", str, actualStr)
-
-	// -----------------------------------------------------------------------
+	// --------------------------------------------------------------------------
 	// everything in Go is passed by value, without reference to original object.
-	
-	type User struct {
-		Name string
-		pets []string
-	}
-	
-	func (u User) newPet() {
-		u.Pets = append(u.Pets, "Lucy")
-		fmt.Println(u)
-	}
 }

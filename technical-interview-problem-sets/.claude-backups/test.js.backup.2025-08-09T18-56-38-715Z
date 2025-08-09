@@ -1,0 +1,13 @@
+const { findDateRangeOverlaps } = require('./dateRange');
+
+// Test Case 1: Example from the README
+function testExample() {
+  const dateRanges = [
+    { id: 1, start: "2023-01-15", end: "2023-01-20", title: "Team Offsite" },
+    { id: 2, start: "2023-01-18", end: "2023-01-25", title: "Product Launch" },
+    { id: 3, start: "2023-01-26", end: "2023-01-31", title: "Marketing Campaign" },
+    { id: 4, start: "2023-01-10", end: "2023-01-16", title: "Budget Planning" }
+  ];
+
+  const result = findDateRangeOverlaps(dateRanges);
+  

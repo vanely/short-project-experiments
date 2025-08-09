@@ -1,0 +1,102 @@
+const { allocateInventory } = require('./inventory');
+
+// Helper function to validate allocation
+function validateAllocation(order, warehouses, result) {
+  // Check that all items are allocated
+  const orderTotals = {};
+  for (const item of order.items) {
+    orderTotals[item.productId] = (orderTotals[item.productId] || 0) + item.quantity;
+  }
+  
+  const allocationTotals = {};
+  for (const allocation of result.allocations) {
+    for (const item of allocation.items) {
+      allocationTotals[item.productId] = (allocationTotals[item.productId] || 0) + item.quantity;
+    }
+  }
+  
+  for (const productId in orderTotals) {
+    if (orderTotals[productId] !== allocationTotals[productId]) {
+      return false;
+    }
+  }
+  
+  // Check that warehouse inventory is not exceeded
+  const warehouseAllocations = {};
+  for (const allocation of result.allocations) {
+    warehouseAllocations[allocation.warehouseId] = warehouseAllocations[allocation.warehouseId] || {};
+    for (const item of allocation.items) {
+      warehouseAllocations[allocation.warehouseId][item.productId] = 
+        (warehouseAllocations[allocation.warehouseId][item.productId] || 0) + item.quantity;
+    }
+  }
+  
+  for (const warehouse of warehouses) {
+    if (!warehouseAllocations[warehouse.id]) continue;
+    
+    for (const productId in warehouseAllocations[warehouse.id]) {
+      if (warehouseAllocations[warehouse.id][productId] > (warehouse.inventory[productId] || 0)) {
+        return false;
+      }
+    }
+  }
+  
+  return true;
+}
+
+// Helper function to calculate the total cost
+function calculateTotalCost(order, warehouses, allocations) {
+  let totalCost = 0;
+  
+  for (const allocation of allocations) {
+    const warehouse = warehouses.find(w => w.id === allocation.warehouseId);
+    const shippingCost = warehouse.shippingCosts[order.region];
+    
+    for (const item of allocation.items) {
+      totalCost += item.quantity * shippingCost;
+    }
+  }
+  
+  return totalCost;
+}
+
+// Test Case 1: Example from the README
+function testExample() {
+  const order = {
+    customerId: 123,
+    region: "East",
+    items: [
+      { productId: "P1", quantity: 5 },
+      { productId: "P2", quantity: 3 }
+    ]
+  };
+
+  const warehouses = [
+    {
+      id: "W1",
+      name: "Warehouse 1",
+      inventory: { "P1": 3, "P2": 2, "P3": 10 },
+      shippingCosts: { "East": 5, "West": 10, "Central": 7 }
+    },
+    {
+      id: "W2",
+      name: "Warehouse 2",
+      inventory: { "P1": 4, "P2": 5, "P4": 8 },
+      shippingCosts: { "East": 6, "West": 8, "Central": 5 }
+    },
+    {
+      id: "W3",
+      name: "Warehouse 3",
+      inventory: { "P1": 2, "P3": 4, "P4": 3 },
+      shippingCosts: { "East": 8, "West": 6, "Central": 9 }
+    }
+  ];
+
+  const result = allocateInventory(order, warehouses);
+  
+  // Validate the allocation
+  const isValid = validateAllocation(order, warehouses, result);
+  console.assert(isValid, "The allocation does not fulfill the order or exceeds warehouse inventory");
+  
+  // Check that the reported total cost matches the actual cost
+  const actualCost = calculateTotalCost(order, warehouses, result.allocations);

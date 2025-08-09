@@ -1,0 +1,235 @@
+# Network Latency Analyzer
+
+## Problem Description
+
+You are developing a monitoring system for a distributed network application. The system collects latency data for requests between various services in the network. Your task is to build an analyzer that can process this latency data and provide insights about the network performance.
+
+## Task
+
+Implement a function `analyzeNetworkLatency(latencyData, requests)` that analyzes network latency data and answers specific queries about the network performance.
+
+## Input
+
+`latencyData`: An array of latency records, each with:
+
+- `source`: The source service identifier (string)
+
+- `destination`: The destination service identifier (string)
+
+- `timestamp`: The time of the measurement (ISO date string)
+
+- `latencyMs`: The measured latency in milliseconds (number)
+
+`requests`: An array of analysis request objects, each with:
+
+- `type`: The type of analysis to perform (string)
+
+- Additional properties specific to the request type
+
+## Output
+
+Return an array of results, one for each request in the `requests` array. The structure of each result depends on the type of request.
+
+## Request Types
+
+### 1. "average_latency"
+
+Request:
+
+```
+{
+  type: "average_latency",
+  source: "service-a",        // Optional
+  destination: "service-b",   // Optional
+  timeRange: {                // Optional
+    start: "2023-01-01T00:00:00Z",
+    end: "2023-01-02T00:00:00Z"
+  }
+}
+```
+
+Result:
+
+```
+{
+  averageLatency: 45.7        // Average latency in milliseconds
+}
+```
+
+Calculates the average latency between the specified source and destination services within the given time range. If source or destination is not specified, includes all sources or destinations. If timeRange is not specified, includes all times.
+
+### 2. "percentile_latency"
+
+Request:
+
+```
+{
+  type: "percentile_latency",
+  percentile: 95,             // The percentile to calculate (number between 0 and 100)
+  source: "service-a",        // Optional
+  destination: "service-b",   // Optional
+  timeRange: {                // Optional
+    start: "2023-01-01T00:00:00Z",
+    end: "2023-01-02T00:00:00Z"
+  }
+}
+```
+
+Result:
+
+```
+{
+  percentileLatency: 120.3    // The Nth percentile latency in milliseconds
+}
+```
+
+Calculates the Nth percentile latency between the specified source and destination services within the given time range.
+
+### 3. "service_ranking"
+
+Request:
+
+```
+{
+  type: "service_ranking",
+  metric: "latency",          // Metric to rank by
+  order: "asc",               // Sorting order ("asc" or "desc")
+  limit: 5                    // Number of services to return
+}
+```
+
+Result:
+
+```
+{
+  rankings: [
+    { service: "service-a", averageLatency: 35.2 },
+    { service: "service-b", averageLatency: 42.8 },
+    // ...
+  ]
+}
+```
+
+Ranks services by their average latency (as a source) and returns the top N services.
+
+### 4. "path_analysis"
+
+Request:
+
+```
+{
+  type: "path_analysis",
+  source: "service-a",
+  destination: "service-e",
+  maxHops: 3                  // Optional, maximum number of hops
+}
+```
+
+Result:
+
+```
+{
+  paths: [
+    {
+      route: ["service-a", "service-b", "service-e"],
+      totalLatency: 130.5
+    },
+    {
+      route: ["service-a", "service-c", "service-e"],
+      totalLatency: 150.2
+    }
+    // ...
+  ]
+}
+```
+
+Finds all possible paths from the source to the destination service with at most `maxHops` intermediate services. For each path, calculates the total latency by summing the average latencies of each hop. Returns paths sorted by total latency (lowest first).
+
+## Example
+
+```
+const latencyData = [
+  { source: "service-a", destination: "service-b", timestamp: "2023-01-01T12:00:00Z", latencyMs: 50 },
+  { source: "service-a", destination: "service-b", timestamp: "2023-01-01T12:05:00Z", latencyMs: 60 },
+  { source: "service-b", destination: "service-c", timestamp: "2023-01-01T12:02:00Z", latencyMs: 20 },
+  { source: "service-a", destination: "service-c", timestamp: "2023-01-01T12:03:00Z", latencyMs: 40 },
+  { source: "service-c", destination: "service-d", timestamp: "2023-01-01T12:04:00Z", latencyMs: 30 },
+  { source: "service-b", destination: "service-d", timestamp: "2023-01-01T12:06:00Z", latencyMs: 70 },
+  { source: "service-a", destination: "service-d", timestamp: "2023-01-01T12:07:00Z", latencyMs: 90 }
+];
+
+const requests = [
+  {
+    type: "average_latency",
+    source: "service-a",
+    destination: "service-b"
+  },
+  {
+    type: "percentile_latency",
+    percentile: 90,
+    source: "service-a"
+  },
+  {
+    type: "service_ranking",
+    metric: "latency",
+    order: "asc",
+    limit: 3
+  },
+  {
+    type: "path_analysis",
+    source: "service-a",
+    destination: "service-d",
+    maxHops: 2
+  }
+];
+
+const results = analyzeNetworkLatency(latencyData, requests);
+console.log(results);
+/*
+Expected output:
+[
+  { averageLatency: 55 },
+  { percentileLatency: 90 },
+  { 
+    rankings: [
+      { service: "service-c", averageLatency: 35 },
+      { service: "service-b", averageLatency: 45 },
+      { service: "service-a", averageLatency: 60 }
+    ] 
+  },
+  { 
+    paths: [
+      { route: ["service-a", "service-d"], totalLatency: 90 },
+      { route: ["service-a", "service-c", "service-d"], totalLatency: 70 },
+      { route: ["service-a", "service-b", "service-d"], totalLatency: 125 }
+    ] 
+  }
+]
+*/
+```
+
+## Constraints
+
+- The number of latency records can be up to 100,000.
+
+- The number of services in the network can be up to 1,000.
+
+- All timestamps are valid ISO 8601 formatted strings.
+
+- Latency values are positive numbers.
+
+- For percentile calculations, round to the nearest index if the percentile falls between two values.
+
+- For path analysis, consider only paths with a direct link between each pair of services.
+
+## Hints
+
+- Process the latency data to create efficient data structures for analysis.
+
+- For path analysis, consider using a graph representation of the network.
+
+- For percentile calculations, you'll need to sort the latency values.
+
+- Precompute average latencies between service pairs to speed up path analysis.
+
+- Filter latency data based on the request criteria (source, destination, time range) before performing the analysis.

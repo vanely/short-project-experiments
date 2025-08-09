@@ -1,0 +1,119 @@
+# JSON Transformer - Solution
+
+## Approach
+
+This problem involves transforming a JSON object according to a set of rules. We need to handle various transformation types (rename, format, restructure, filter, calculate) and apply them to potentially deeply nested objects.
+
+The approach is to:
+
+1. $1
+
+2. $1
+
+3. $1
+
+4. $1
+
+## Solution Explanation
+
+The solution consists of several key components:
+
+### 1. Property Access and Modification
+
+- `getNestedProperty`: A function that uses dot notation to access deeply nested properties.
+
+- `setNestedProperty`: A function that uses dot notation to set deeply nested properties, creating any intermediate objects as needed.
+
+- `deleteNestedProperty`: A function that removes a property specified by dot notation.
+
+### 2. Transformation Handlers
+
+Each transformation type has its own handler function:
+
+- **Rename**: Retrieves the value from the source path, deletes it from the original location, and sets it at the new path.
+
+- **Format**: Retrieves the value and applies the specified formatting function (uppercase, lowercase, date formatting, or number formatting).
+
+- **Restructure**: Similar to rename but ensures that the source field is not deleted after being moved.
+
+- **Filter**: Applies a filtering operation to an array based on the specified condition.
+
+- **Calculate**: Performs a calculation operation (sum, average, min, max, count) on an array field.
+
+### 3. Main Transformation Function
+
+The main function applies each transformation rule in sequence:
+
+1. $1
+
+2. $1
+
+3. $1
+
+4. $1
+
+## Time Complexity
+
+- **Property Access/Modification**: O(d) for each operation, where d is the depth of the nested property.
+
+- **Rename/Restructure/Format**: O(d) for each transformation.
+
+- **Filter**: O(n * d), where n is the number of elements in the array being filtered.
+
+- **Calculate**: O(n * d), where n is the number of elements in the array being calculated.
+
+Overall time complexity: O(r * n * d), where r is the number of transformation rules, n is the maximum size of any array, and d is the maximum depth of any property.
+
+## Space Complexity
+
+- Deep copy of the input JSON: O(s), where s is the size of the input JSON.
+
+- Additional intermediate objects: O(s) in the worst case.
+
+Overall space complexity: O(s)
+
+## Optimization Considerations
+
+1. $1
+
+2. $1
+
+3. $1
+
+4. $1
+
+## Key Insights
+
+1. $1
+
+2. $1
+
+3. $1
+
+4. $1
+
+This problem demonstrates the importance of data transformation in real-world applications, particularly in systems that integrate with multiple external APIs that may have different data formats.
+aching Nested Paths**: We could cache the results of property lookups to avoid repeatedly traversing the same paths.
+## Key Insights
+
+1. $1
+
+2. $1
+
+3. $1
+
+4. $1
+
+This problem demonstrates the importance of data transformation in real-world applications, particularly in systems that integrate with multiple external APIs that may have different data formats.
+aching Nested Paths**: We could cache the results of property lookups to avoid repeatedly traversing the same paths.
+## Key Insights
+
+1. $1
+
+2. $1
+
+3. $1
+
+4. $1
+
+This problem demonstrates the importance of data transformation in real-world applications, particularly in systems that integrate with multiple external APIs that may have different data formats.
