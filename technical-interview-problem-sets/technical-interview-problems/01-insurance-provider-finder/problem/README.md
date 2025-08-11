@@ -4,7 +4,8 @@
 
 You are developing a health insurance marketplace application. The system needs to help users find the most affordable health insurance plan that works with their preferred healthcare providers.
 
-You are given three arrays: NOTE: populate these entries with actual arrays.
+You are given three arrays: 
+NOTE: populate these entries with actual arrays.
 
 1. $1
 
