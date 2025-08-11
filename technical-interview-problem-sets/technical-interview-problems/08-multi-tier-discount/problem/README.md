@@ -196,6 +196,7 @@ Example:
 ```
 
 ## Discount Application Rules
+NOTE: update and populate the rule list
 
 1. $1
 

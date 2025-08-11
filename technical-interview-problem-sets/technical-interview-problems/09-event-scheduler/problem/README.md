@@ -140,6 +140,7 @@ Expected output:
 */
 ```
 
+NOTE: populate these items in "Assitional Details", and "Hints"
 ## Additional Details
 
 1. $1
