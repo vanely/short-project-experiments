@@ -13,13 +13,26 @@ func main() {
 	fmt.Printf("\nGet your tickets here to attend\n")
 
 	fmt.Printf("\nTotal number of tickets: %v.\nRemaining tickets: %v.\n", conferenceTickets, remainingTickets)
-	var username string
+	var firstName string
+	var lastName string
+	var email string
 	var userTickets int
 
-	// fmt.Scan(username)
-	fmt.Printf("\nActual remainingTickets value: %v", conferenceTickets)
-	fmt.Printf("\nMemory location of remainingTickets: %v\n", &remainingTickets)
-	username = "Tom"
+	// ask user for name, and store in the memory location of 'username'
+	fmt.Print("Enter your first name: ")
+	fmt.Scan(&firstName)
+
+	fmt.Print("Enter your last name: ")
+	fmt.Scan(&lastName)
+
+	fmt.Print("Enter your email address: ")
+	fmt.Scan(&email)
+
+	fmt.Print("Enter number of tickets: ")
+	fmt.Scan(&userTickets)
+	// working with pointers
+	// fmt.Printf("\nActual remainingTickets value: %v", conferenceTickets)
+	// fmt.Printf("\nMemory location of remainingTickets: %v\n", &remainingTickets)
 	userTickets = 2
-	fmt.Printf("\nuser %v booked %v tickets", username, userTickets)
+	fmt.Printf("\nuser %v booked %v tickets", firstName, userTickets)
 }

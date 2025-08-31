@@ -1,0 +1,82 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nginx-connection-pool-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-backend
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  # Scale based on connection pool utilization
+  - type: Object
+    object:
+      metric:
+        name: nginx_connection_pool_utilization
+      describedObject:
+        apiVersion: v1
+        kind: Service
+        name: nginx-backend-service
+      target:
+        type: AverageValue
+        averageValue: 80  # Scale when 80% of connection pool is used
+  # Scale based on CPU usage as backup
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  # Scale based on memory usage
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60  # Wait 1 minute before scaling up
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15  # Scale up by 100% every 15 seconds
+      - type: Pods
+        value: 2
+        periodSeconds: 15  # Or scale up by 2 pods every 15 seconds
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Wait 5 minutes before scaling down
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60  # Scale down by 10% every minute
+      - type: Pods
+        value: 1
+        periodSeconds: 60  # Or scale down by 1 pod every minute
+      selectPolicy: Min
+---
+# Vertical Pod Autoscaler for individual pod optimization
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: nginx-vpa
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nginx-backend
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: '*'
+      minAllowed:
+        cpu: 100m
+        memory: 128Mi
+      maxAllowed:
+        cpu: 1000m
+        memory: 1Gi
+      controlledValues: RequestsAndLimits 

@@ -1,0 +1,93 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: nginxconnectionpools.nginx.example.com
+spec:
+  group: nginx.example.com
+  names:
+    kind: NginxConnectionPool
+    listKind: NginxConnectionPoolList
+    plural: nginxconnectionpools
+    singular: nginxconnectionpool
+  scope: Namespaced
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              maxConnections:
+                type: integer
+                description: Maximum connections per worker
+              currentConnections:
+                type: integer
+                description: Current active connections
+              connectionUtilization:
+                type: number
+                format: float
+                description: Connection pool utilization percentage
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-metrics-config
+data:
+  metrics-config.yaml: |
+    rules:
+    - seriesQuery: 'nginx_connections_total'
+      resources:
+        overrides:
+          pod: {resource: "pod"}
+          namespace: {resource: "namespace"}
+      name:
+        matches: "nginx_connections_total"
+        as: "nginx_connection_pool_utilization"
+      metricsQuery: 'sum(rate(nginx_connections_total[5m])) by (pod) / 1024 * 100'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-metrics-adapter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-metrics-adapter
+  template:
+    metadata:
+      labels:
+        app: nginx-metrics-adapter
+    spec:
+      containers:
+      - name: metrics-adapter
+        image: custom-metrics-adapter:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: METRICS_CONFIG_PATH
+          value: "/etc/metrics-config/metrics-config.yaml"
+        volumeMounts:
+        - name: metrics-config
+          mountPath: /etc/metrics-config
+      volumes:
+      - name: metrics-config
+        configMap:
+          name: nginx-metrics-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-metrics-adapter-service
+spec:
+  selector:
+    app: nginx-metrics-adapter
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP 
