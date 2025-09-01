@@ -1,0 +1,63 @@
+# PostgreSQL Backup Service Dockerfile
+FROM postgres:15-alpine
+
+# Install additional tools
+RUN apk add --no-cache \
+    curl \
+    wget \
+    tar \
+    gzip \
+    cronie \
+    bash \
+    jq \
+    && rm -rf /var/cache/apk/*
+
+# Create backup directories
+RUN mkdir -p /backups/postgres/full \
+    && mkdir -p /backups/postgres/incremental \
+    && mkdir -p /backups/postgres/snapshots \
+    && mkdir -p /backups/postgres/logs \
+    && mkdir -p /scripts
+
+# Copy backup script
+COPY postgres-backup.sh /scripts/postgres-backup.sh
+RUN chmod +x /scripts/postgres-backup.sh
+
+# Create cron job
+RUN echo "0 2 * * * /scripts/postgres-backup.sh full >> /backups/postgres/logs/cron.log 2>&1" > /etc/crontabs/root
+
+# Create health check script
+RUN echo '#!/bin/sh' > /health-check.sh \
+    && echo 'pg_isready -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB' >> /health-check.sh \
+    && chmod +x /health-check.sh
+
+# Create backup monitoring endpoint
+RUN echo '#!/bin/sh' > /monitor.sh \
+    && echo 'echo "Content-Type: text/html"' >> /monitor.sh \
+    && echo 'echo ""' >> /monitor.sh \
+    && echo 'echo "<html><head><title>PostgreSQL Backup Status</title></head><body>"' >> /monitor.sh \
+    && echo 'echo "<h1>PostgreSQL Backup Status</h1>"' >> /monitor.sh \
+    && echo 'echo "<h2>Latest Backup</h2>"' >> /monitor.sh \
+    && echo 'if [ -f /backups/postgres/latest_full_backup.txt ]; then' >> /monitor.sh \
+    && echo '  echo "<p>Latest backup: $(cat /backups/postgres/latest_full_backup.txt)</p>"' >> /monitor.sh \
+    && echo '  echo "<p>Backup size: $(du -h $(cat /backups/postgres/latest_full_backup.txt) 2>/dev/null | cut -f1 || echo "N/A")</p>"' >> /monitor.sh \
+    && echo 'else' >> /monitor.sh \
+    && echo '  echo "<p>No backups found</p>"' >> /monitor.sh \
+    && echo 'fi' >> /monitor.sh \
+    && echo 'echo "<h2>Backup Statistics</h2>"' >> /monitor.sh \
+    && echo 'echo "<p>Full backups: $(find /backups/postgres/full -name "*.sql*" 2>/dev/null | wc -l)</p>"' >> /monitor.sh \
+    && echo 'echo "<p>Total size: $(du -sh /backups/postgres 2>/dev/null | cut -f1 || echo "N/A")</p>"' >> /monitor.sh \
+    && echo 'echo "<h2>Recent Logs</h2>"' >> /monitor.sh \
+    && echo 'echo "<pre>$(tail -20 /backups/postgres/logs/cron.log 2>/dev/null || echo "No logs found")</pre>"' >> /monitor.sh \
+    && echo 'echo "</body></html>"' >> /monitor.sh \
+    && chmod +x /monitor.sh
+
+# Expose monitoring port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD /health-check.sh || exit 1
+
+# Start cron daemon
+CMD ["crond", "-f", "-d", "8"] 

@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Backup Service
+  postgres-backup:
+    build:
+      context: .
+      dockerfile: Dockerfile.backup
+    container_name: postgres-backup
+    environment:
+      POSTGRES_DB: todo_db
+      POSTGRES_USER: todo_user
+      POSTGRES_PASSWORD: todo_password
+      POSTGRES_HOST: postgres
+      BACKUP_SCHEDULE: "0 2 * * *"  # Daily at 2 AM
+      RETENTION_DAYS: 30
+      COMPRESSION: gzip
+    volumes:
+      - postgres_backup_data:/backups
+      - /var/run/podman/podman.sock:/var/run/docker.sock:ro
+    depends_on:
+      - postgres
+    networks:
+      - todo-network
+    restart: unless-stopped
+    command: ["cron", "-f"]
+
+  # Backup Monitoring Service
+  backup-monitor:
+    image: nginx:alpine
+    container_name: backup-monitor
+    ports:
+      - "8080:80"
+    volumes:
+      - postgres_backup_data:/backups:ro
+      - ./backup-monitor.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - postgres-backup
+    networks:
+      - todo-network
+    restart: unless-stopped
+
+  # Backup Storage Service (Optional - for remote storage)
+  backup-storage:
+    image: minio/minio:latest
+    container_name: backup-storage
+    environment:
+      MINIO_ROOT_USER: backupadmin
+      MINIO_ROOT_PASSWORD: backupsecret123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - backup_storage_data:/data
+    networks:
+      - todo-network
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+
+volumes:
+  postgres_backup_data:
+    driver: local
+  backup_storage_data:
+    driver: local
+
+networks:
+  todo-network:
+    external: true 
